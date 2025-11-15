@@ -1,11 +1,12 @@
 'use client'
 
-import { LayoutDashboard, Users, Settings, LogOut, ChevronLeft, ChevronRight, Languages } from 'lucide-react'
+import { LayoutDashboard, Users, Settings, LogOut, ChevronLeft, ChevronRight, Languages, Package } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { logout } from '@/lib/actions/auth'
 import { Button } from './ui/button'
 import Link from 'next/link'
 import { useParams, usePathname, useRouter } from 'next/navigation'
+import { useTransition } from 'react'
 
 interface SidebarProps {
   collapsed: boolean
@@ -19,11 +20,18 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const locale = params.locale as string
+  const [isPending, startTransition] = useTransition()
 
   const switchLocale = () => {
     const newLocale = locale === 'en' ? 'th' : 'en'
     const newPath = pathname.replace(`/${locale}`, `/${newLocale}`)
     router.push(newPath)
+  }
+
+  const handleLogout = () => {
+    startTransition(async () => {
+      await logout()
+    })
   }
 
   return (
@@ -43,6 +51,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <Users className="h-5 w-5" />
           {!collapsed && t('users')}
         </Link>
+        <Link href={`/${locale}/inventory`} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${pathname.includes(`/${locale}/inventory`) ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'} ${collapsed ? 'justify-center' : ''}`}>
+          <Package className="h-5 w-5" />
+          {!collapsed && 'Inventory'}
+        </Link>
         <Link href="#" className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-[hsl(var(--color-accent))] ${collapsed ? 'justify-center' : ''}`}>
           <Settings className="h-5 w-5" />
           {!collapsed && t('settings')}
@@ -53,12 +65,15 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <Languages className={`h-4 w-4 ${collapsed ? '' : 'mr-2'}`} />
           {!collapsed && (locale === 'en' ? 'ไทย' : 'EN')}
         </Button>
-        <form action={logout}>
-          <Button variant="ghost" className={`w-full ${collapsed ? 'justify-center px-0' : 'justify-start'}`} type="submit">
-            <LogOut className={`h-5 w-5 ${collapsed ? '' : 'mr-2'}`} />
-            {!collapsed && tAuth('logout')}
-          </Button>
-        </form>
+        <Button
+          variant="ghost"
+          className={`w-full ${collapsed ? 'justify-center px-0' : 'justify-start'}`}
+          onClick={handleLogout}
+          disabled={isPending}
+        >
+          <LogOut className={`h-5 w-5 ${collapsed ? '' : 'mr-2'}`} />
+          {!collapsed && tAuth('logout')}
+        </Button>
       </div>
     </div>
   )

@@ -1,34 +1,30 @@
-'use client'
+import { getTranslations } from 'next-intl/server'
+import { UserTable } from './_components/user-table'
+import { getAuthUsers } from './_lib/queries'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { isAdmin } from '@/lib/permissions'
 
-import { ColumnDef } from '@tanstack/react-table'
-import { DataTable } from '@/components/data-table'
-import { useTranslations } from 'next-intl'
+export default async function UsersPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-type User = {
-  id: string
-  name: string
-  email: string
-  role: string
-}
+  console.log('User:', user?.email)
+  console.log('Raw app_metadata:', user?.app_metadata)
+  console.log('Roles:', user?.app_metadata?.roles)
+  console.log('Is Admin:', isAdmin(user))
 
-const columns: ColumnDef<User>[] = [
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'email', header: 'Email' },
-  { accessorKey: 'role', header: 'Role' },
-]
+  if (!user || !isAdmin(user)) {
+    redirect('/dashboard')
+  }
 
-const data: User[] = [
-  { id: '1', name: 'John Doe', email: 'john@example.com', role: 'Admin' },
-  { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'User' },
-]
-
-export default function UsersPage() {
-  const t = useTranslations('dashboard')
+  const { data: users } = await getAuthUsers()
+  const t = await getTranslations('dashboard')
 
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">{t('users')}</h1>
-      <DataTable columns={columns} data={data} />
+      <UserTable data={users || []} />
     </div>
   )
 }
