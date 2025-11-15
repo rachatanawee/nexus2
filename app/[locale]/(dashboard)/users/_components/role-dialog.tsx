@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { User } from '../_lib/types'
 import { useState } from 'react'
 import { updateUserRole } from '../_lib/actions'
+import { toast } from 'sonner'
 
 interface RoleDialogProps {
   open: boolean
@@ -32,14 +33,15 @@ export function RoleDialog({ open, onOpenChange, user }: RoleDialogProps) {
     formData.append('newRoles', selectedRoles.join(','))
 
     const result = await updateUserRole({ success: false, message: '' }, formData)
-    setMessage(result.message)
     setLoading(false)
 
     if (result.success) {
-      setTimeout(() => {
-        onOpenChange(false)
-        window.location.reload()
-      }, 1000)
+      toast.success(result.message)
+      onOpenChange(false)
+      window.location.reload()
+    } else {
+      toast.error(result.message)
+      setMessage(result.message)
     }
   }
 

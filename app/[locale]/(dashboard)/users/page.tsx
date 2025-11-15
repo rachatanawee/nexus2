@@ -24,7 +24,7 @@ export default async function UsersPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">{t('users')}</h1>
-      <UserTable data={users || []} />
+      <UserTable data={users || []} totalItems={users?.length || 0} />
     </div>
   )
 }

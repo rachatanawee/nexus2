@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 export default function LoginPage() {
   const t = useTranslations('auth')
@@ -16,6 +17,7 @@ export default function LoginPage() {
     const result = await login(formData)
     if (result?.error) {
       setError(result.error)
+      toast.error(result.error)
     }
   }
 

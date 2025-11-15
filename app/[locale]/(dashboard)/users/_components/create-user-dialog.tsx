@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { createUser } from '../_lib/actions'
+import { toast } from 'sonner'
 
 interface CreateUserDialogProps {
   open: boolean
@@ -32,14 +33,15 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
     formData.append('roles', selectedRoles.join(','))
 
     const result = await createUser({ success: false, message: '' }, formData)
-    setMessage(result.message)
     setLoading(false)
 
     if (result.success) {
-      setTimeout(() => {
-        onOpenChange(false)
-        window.location.reload()
-      }, 1000)
+      toast.success(result.message)
+      onOpenChange(false)
+      window.location.reload()
+    } else {
+      toast.error(result.message)
+      setMessage(result.message)
     }
   }
 
