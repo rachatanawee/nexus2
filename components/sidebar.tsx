@@ -1,12 +1,12 @@
 'use client'
 
-import { LayoutDashboard, Users, Settings, LogOut, ChevronLeft, ChevronRight, Languages, Package } from 'lucide-react'
+import { LayoutDashboard, Users, Settings, LogOut, ChevronLeft, ChevronRight, Languages, Package, ChevronDown } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { logout } from '@/lib/actions/auth'
 import { Button } from './ui/button'
 import Link from 'next/link'
 import { useParams, usePathname, useRouter } from 'next/navigation'
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 
 interface SidebarProps {
   collapsed: boolean
@@ -21,6 +21,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const router = useRouter()
   const locale = params.locale as string
   const [isPending, startTransition] = useTransition()
+  const [inventoryOpen, setInventoryOpen] = useState(pathname.includes('/inventory'))
 
   const switchLocale = () => {
     const newLocale = locale === 'en' ? 'th' : 'en'
@@ -51,10 +52,30 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <Users className="h-5 w-5" />
           {!collapsed && t('users')}
         </Link>
-        <Link href={`/${locale}/inventory`} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${pathname.includes(`/${locale}/inventory`) ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'} ${collapsed ? 'justify-center' : ''}`}>
-          <Package className="h-5 w-5" />
-          {!collapsed && 'Inventory'}
-        </Link>
+        <div>
+          <button
+            onClick={() => setInventoryOpen(!inventoryOpen)}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium ${pathname.includes(`/${locale}/inventory`) ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'} ${collapsed ? 'justify-center' : ''}`}
+          >
+            <Package className="h-5 w-5" />
+            {!collapsed && (
+              <>
+                <span className="flex-1 text-left">Inventory</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${inventoryOpen ? 'rotate-180' : ''}`} />
+              </>
+            )}
+          </button>
+          {!collapsed && inventoryOpen && (
+            <div className="ml-8 mt-1 space-y-1">
+              <Link href={`/${locale}/inventory/products`} className={`block rounded-lg px-3 py-2 text-sm ${pathname === `/${locale}/inventory/products` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'}`}>
+                Products
+              </Link>
+              <Link href={`/${locale}/inventory/warehouses`} className={`block rounded-lg px-3 py-2 text-sm ${pathname === `/${locale}/inventory/warehouses` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'}`}>
+                Warehouses
+              </Link>
+            </div>
+          )}
+        </div>
         <Link href="#" className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-[hsl(var(--color-accent))] ${collapsed ? 'justify-center' : ''}`}>
           <Settings className="h-5 w-5" />
           {!collapsed && t('settings')}

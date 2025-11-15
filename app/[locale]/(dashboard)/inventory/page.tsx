@@ -6,7 +6,7 @@ export default function InventoryPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Inventory Management</h1>
       <div className="grid gap-4 md:grid-cols-2">
-        <Link href="products">
+        <Link href="/inventory/products">
           <Card className="hover:bg-[hsl(var(--color-accent))] cursor-pointer">
             <CardHeader>
               <CardTitle>Products</CardTitle>
@@ -18,7 +18,7 @@ export default function InventoryPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="warehouses">
+        <Link href="/inventory/warehouses">
           <Card className="hover:bg-[hsl(var(--color-accent))] cursor-pointer">
             <CardHeader>
               <CardTitle>Warehouses</CardTitle>
