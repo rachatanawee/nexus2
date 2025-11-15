@@ -3,4 +3,5 @@ export type User = {
   email: string
   roles: string[]
   created_at: string
+  [key: string]: unknown
 }

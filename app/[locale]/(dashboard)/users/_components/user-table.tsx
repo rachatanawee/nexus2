@@ -19,7 +19,7 @@ interface UserTableProps {
 export function UserTable({ data, totalItems }: UserTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
 
-  const getColumns = (): ColumnDef<User>[] => [
+  const getColumns = () => [
     { 
       accessorKey: 'email', 
       header: 'Email',
@@ -29,7 +29,7 @@ export function UserTable({ data, totalItems }: UserTableProps) {
       accessorKey: 'roles',
       header: 'Roles',
       enableSorting: false,
-      cell: ({ row }) => {
+      cell: ({ row }: any) => {
         const roles = row.original.roles
         return roles.length > 0 ? roles.join(', ') : 'No roles'
       }
@@ -38,7 +38,7 @@ export function UserTable({ data, totalItems }: UserTableProps) {
       id: 'actions',
       header: 'Actions',
       enableSorting: false,
-      cell: ({ row }) => {
+      cell: ({ row }: any) => {
         const [open, setOpen] = useState(false)
         const [deleting, setDeleting] = useState(false)
 
@@ -135,7 +135,7 @@ export function UserTable({ data, totalItems }: UserTableProps) {
       </div>
       <DataTable
         getColumns={getColumns}
-        fetchDataFn={fetchData}
+        fetchDataFn={fetchData as any}
         exportConfig={{
           entityName: 'users',
           columnMapping: {
