@@ -1,0 +1,31 @@
+{
+  "keywords": [
+    "nextjs",
+    "next.js",
+    "supabase",
+    "authentication",
+    "rbac",
+    "role-based-access-control",
+    "admin-dashboard",
+    "boilerplate",
+    "starter",
+    "template",
+    "typescript",
+    "tailwindcss",
+    "shadcn-ui",
+    "i18n",
+    "multi-language",
+    "monolith",
+    "feature-colocation",
+    "tanstack-table",
+    "data-table"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/nexus2"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/nexus2/issues"
+  },
+  "homepage": "https://github.com/your-username/nexus2#readme"
+}

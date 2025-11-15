@@ -1,6 +1,31 @@
 {
   "name": "nexus2",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Production-ready Next.js 16 boilerplate with Supabase authentication, RBAC, multi-language support, and admin dashboard using Feature-Colocation pattern",
+  "keywords": [
+    "nextjs",
+    "supabase",
+    "authentication",
+    "rbac",
+    "admin-dashboard",
+    "boilerplate",
+    "typescript",
+    "tailwindcss",
+    "shadcn-ui",
+    "i18n",
+    "monolith",
+    "feature-colocation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/nexus2"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/nexus2/issues"
+  },
+  "homepage": "https://github.com/your-username/nexus2#readme",
+  "author": "Your Name",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",
