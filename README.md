@@ -4,14 +4,16 @@ Next.js boilerplate with Supabase authentication, multi-language support (EN/TH)
 
 ## Features
 
-- ✅ Next.js 15 with App Router
+- ✅ Next.js 16 with App Router
 - ✅ Supabase Authentication with Server Actions
 - ✅ Cookie-based JWT storage
 - ✅ Multi-language (English/Thai) with next-intl
-- ✅ Route Guards (middleware protection)
-- ✅ Admin Dashboard Template
+- ✅ Route Guards (proxy.ts protection)
+- ✅ Admin Dashboard with Collapsible Sidebar
+- ✅ TanStack Table (sorting, pagination)
 - ✅ shadcn/ui Components
-- ✅ Tailwind CSS
+- ✅ Tailwind CSS v4
+- ✅ Language Switcher
 
 ## Setup
 
@@ -43,9 +45,15 @@ app/
 │   ├── (auth)/
 │   │   └── login/          # Login page
 │   ├── (dashboard)/
-│   │   └── dashboard/      # Protected dashboard
+│   │   ├── dashboard/      # Protected dashboard
+│   │   └── users/          # Users page with table
 │   ├── layout.tsx          # Locale layout with i18n
 │   └── page.tsx            # Root redirect
+components/
+├── ui/                     # shadcn/ui components
+├── sidebar.tsx             # Collapsible sidebar
+├── dashboard-layout.tsx    # Dashboard wrapper
+└── data-table.tsx          # TanStack Table component
 lib/
 ├── actions/
 │   └── auth.ts             # Server actions (login/logout)
@@ -57,7 +65,7 @@ lib/
 messages/
 ├── en.json                 # English translations
 └── th.json                 # Thai translations
-middleware.ts               # Route guard + i18n
+proxy.ts                    # Route guard + i18n (Next.js 16)
 ```
 
 ## Usage
@@ -65,11 +73,23 @@ middleware.ts               # Route guard + i18n
 ### Authentication
 - Login: `/en/login` or `/th/login`
 - Dashboard: `/en/dashboard` or `/th/dashboard`
+- Users: `/en/users` or `/th/users`
 - Automatic redirect if not authenticated
 
 ### Language Switching
-- English: `/en/*`
-- Thai: `/th/*`
+- Click language button in sidebar (EN/ไทย)
+- Or navigate to `/en/*` or `/th/*`
+
+### Dashboard Features
+- Collapsible sidebar (click chevron icon)
+- Navigation menu (Overview, Users, Settings)
+- Language switcher
+- Logout button
+
+### Data Table
+- TanStack Table with sorting
+- Pagination controls
+- Example implementation in `/users` page
 
 ### Protected Routes
-All `/dashboard` routes require authentication. Middleware automatically redirects to login if not authenticated.
+All `/dashboard` routes require authentication. Proxy automatically redirects to login if not authenticated.
