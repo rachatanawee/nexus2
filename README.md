@@ -5,15 +5,15 @@ Production-ready Next.js boilerplate with Supabase authentication, role-based ac
 ## Features
 
 - ✅ **Next.js 16** with App Router
-- ✅ **Supabase Auth** with Server Actions & Cookie-based JWT
+- ✅ **Supabase Auth** with Server Actions & Cookie-based session
 - ✅ **Role-Based Access Control (RBAC)** - Multiple roles per user
 - ✅ **Multi-language** (EN/TH) with next-intl
-- ✅ **Route Guards** (proxy.ts protection)
+- ✅ **Route Guards** (Middleware protection)
 - ✅ **Admin Dashboard** with collapsible sidebar & submenu
 - ✅ **User Management** - Full CRUD with role assignment
 - ✅ **TanStack Table** - Sorting, pagination, filtering
 - ✅ **shadcn/ui Components**
-- ✅ **Tailwind CSS v4**
+- ✅ **Tailwind CSS**
 - ✅ **Feature-Colocation** - Monolith architecture pattern
 
 ## Architecture: Monolith with Feature-Colocation
@@ -134,7 +134,7 @@ messages/
 ├── en.json                 # English translations
 └── th.json                 # Thai translations
 
-proxy.ts                    # Route guard + i18n
+middleware.ts               # Route guard + i18n
 ```
 
 ## Usage
