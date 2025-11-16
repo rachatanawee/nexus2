@@ -7,13 +7,23 @@ import { Button } from '@/components/ui/button'
 import { useState, useCallback } from 'react'
 import { ProductFormDialog } from './product-form-dialog'
 import { deleteProduct } from '../_lib/actions'
-import { Trash2, Pencil } from 'lucide-react'
+import { Trash2, Pencil, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatNumber, formatDate, useFormatSettings } from '../_lib/format'
 
 interface ProductTableProps {
   data: Product[]
   totalItems: number
+}
+
+interface FetchDataParams {
+  page: number
+  limit: number
+  search: string
+  sort_by?: string
+  sort_order?: string
+  from_date?: string
+  to_date?: string
 }
 
 export function ProductTable({ data, totalItems }: ProductTableProps) {
@@ -128,7 +138,7 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
     }
   ], [formatSettings, handleDeleteSuccess])
 
-  const fetchData = useCallback(async (params: any) => {
+  const fetchData = useCallback(async (params: FetchDataParams) => {
     let filtered = [...tableData]
 
     if (params.search) {
@@ -155,7 +165,11 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={refreshTableData}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
         <Button onClick={() => setCreateOpen(true)}>Create Product</Button>
       </div>
       <DataTable
