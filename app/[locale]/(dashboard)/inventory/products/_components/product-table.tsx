@@ -3,45 +3,77 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/data-table/data-table'
 import { Product } from '../_lib/types'
+import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { CreateProductDialog } from './create-product-dialog'
+import { deleteProduct } from '../_lib/actions'
+import { Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface ProductTableProps {
   data: Product[]
+  totalItems: number
 }
 
-export function ProductTable({ data }: ProductTableProps) {
-  const getColumns = (): ColumnDef<Product>[] => [
-    { accessorKey: 'sku', header: 'SKU', enableSorting: true },
+export function ProductTable({ data, totalItems }: ProductTableProps) {
+  const [createOpen, setCreateOpen] = useState(false)
+
+  const getColumns = () => [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
-    { accessorKey: 'quantity', header: 'Quantity', enableSorting: true },
+    { accessorKey: 'sku', header: 'Sku', enableSorting: true },
+    { accessorKey: 'description', header: 'Description', enableSorting: true },
+    { accessorKey: 'category_id', header: 'Category_id', enableSorting: true },
     { accessorKey: 'price', header: 'Price', enableSorting: true },
+    { accessorKey: 'cost', header: 'Cost', enableSorting: true },
+    { accessorKey: 'stock_quantity', header: 'Stock_quantity', enableSorting: true },
+    { accessorKey: 'min_stock_level', header: 'Min_stock_level', enableSorting: true },
+    { accessorKey: 'image_url', header: 'Image_url', enableSorting: true },
+    { accessorKey: 'is_active', header: 'Is_active', enableSorting: true },
+    {
+      accessorKey: 'created_at',
+      header: 'Created',
+      enableSorting: true,
+      cell: ({ row }: any) => new Date(row.original.created_at).toLocaleDateString()
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      enableSorting: false,
+      cell: ({ row }: any) => {
+        const [deleting, setDeleting] = useState(false)
+
+        const handleDelete = async () => {
+          if (!confirm(`Delete ${row.original.name}?`)) return
+          setDeleting(true)
+          const formData = new FormData()
+          formData.append('id', row.original.id)
+          const result = await deleteProduct({ success: false, message: '' }, formData)
+          setDeleting(false)
+          
+          if (result.success) {
+            toast.success(result.message)
+            window.location.reload()
+          } else {
+            toast.error(result.message)
+          }
+        }
+
+        return (
+          <Button variant="outline" size="sm" onClick={handleDelete} disabled={deleting}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )
+      }
+    }
   ]
 
-  const fetchData = async (params: {
-    page: number
-    limit: number
-    search: string
-    from_date: string
-    to_date: string
-    sort_by: string
-    sort_order: string
-  }) => {
+  const fetchData = async (params: any) => {
     let filtered = [...data]
 
     if (params.search) {
-      const searchLower = params.search.toLowerCase()
-      filtered = filtered.filter(p => 
-        p.sku.toLowerCase().includes(searchLower) ||
-        p.name.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(item => 
+        item.name.toLowerCase().includes(params.search.toLowerCase())
       )
-    }
-
-    if (params.sort_by) {
-      filtered.sort((a, b) => {
-        const aVal = a[params.sort_by as keyof Product]
-        const bVal = b[params.sort_by as keyof Product]
-        const compare = aVal > bVal ? 1 : -1
-        return params.sort_order === 'asc' ? compare : -compare
-      })
     }
 
     const start = (params.page - 1) * params.limit
@@ -60,24 +92,53 @@ export function ProductTable({ data }: ProductTableProps) {
   }
 
   return (
-    <DataTable
-      getColumns={getColumns}
-      fetchDataFn={fetchData}
-      exportConfig={{
-        entityName: 'products',
-        columnMapping: { sku: 'SKU', name: 'Name', quantity: 'Quantity', price: 'Price' },
-        columnWidths: [{ wch: 15 }, { wch: 25 }, { wch: 12 }, { wch: 12 }],
-        headers: ['SKU', 'Name', 'Quantity', 'Price']
-      }}
-      idField="id"
-      config={{
-        enableRowSelection: false,
-        enableToolbar: true,
-        enablePagination: true,
-        enableSearch: true,
-        enableDateFilter: false,
-        enableExport: true
-      }}
-    />
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button onClick={() => setCreateOpen(true)}>Create Product</Button>
+      </div>
+      <DataTable
+        getColumns={getColumns}
+        fetchDataFn={fetchData}
+        exportConfig={{
+          entityName: 'products',
+          columnMapping: {
+            name: 'Name',
+            sku: 'Sku',
+            description: 'Description',
+            category_id: 'Category_id',
+            price: 'Price',
+            cost: 'Cost',
+            stock_quantity: 'Stock_quantity',
+            min_stock_level: 'Min_stock_level',
+            image_url: 'Image_url',
+            is_active: 'Is_active'
+          },
+          columnWidths: [
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 20 }
+          ],
+          headers: ['Name', 'Sku', 'Description', 'Category_id', 'Price', 'Cost', 'Stock_quantity', 'Min_stock_level', 'Image_url', 'Is_active']
+        }}
+        idField="id"
+        config={{
+          enableRowSelection: false,
+          enableToolbar: true,
+          enablePagination: true,
+          enableSearch: true,
+          enableDateFilter: false,
+          enableExport: true,
+          enableColumnVisibility: true
+        }}
+      />
+      <CreateProductDialog open={createOpen} onOpenChange={setCreateOpen} />
+    </div>
   )
 }

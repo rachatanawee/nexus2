@@ -2,30 +2,32 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/data-table/data-table'
-import { Warehouse } from '../_lib/types'
+import { Supplier } from '../_lib/types'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
-import { CreateWarehouseDialog } from './create-warehouse-dialog'
-import { deleteWarehouse } from '../_lib/actions'
+import { CreateSupplierDialog } from './create-supplier-dialog'
+import { deleteSupplier } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-interface WarehouseTableProps {
-  data: Warehouse[]
+interface SupplierTableProps {
+  data: Supplier[]
   totalItems: number
 }
 
-export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
+export function SupplierTable({ data, totalItems }: SupplierTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
 
   const getColumns = () => [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
     { accessorKey: 'code', header: 'Code', enableSorting: true },
+    { accessorKey: 'contact_person', header: 'Contact_person', enableSorting: true },
+    { accessorKey: 'email', header: 'Email', enableSorting: true },
+    { accessorKey: 'phone', header: 'Phone', enableSorting: true },
     { accessorKey: 'address', header: 'Address', enableSorting: true },
     { accessorKey: 'city', header: 'City', enableSorting: true },
     { accessorKey: 'country', header: 'Country', enableSorting: true },
-    { accessorKey: 'manager_name', header: 'Manager_name', enableSorting: true },
-    { accessorKey: 'phone', header: 'Phone', enableSorting: true },
+    { accessorKey: 'payment_terms', header: 'Payment_terms', enableSorting: true },
     { accessorKey: 'is_active', header: 'Is_active', enableSorting: true },
     {
       accessorKey: 'created_at',
@@ -45,7 +47,7 @@ export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
           setDeleting(true)
           const formData = new FormData()
           formData.append('id', row.original.id)
-          const result = await deleteWarehouse({ success: false, message: '' }, formData)
+          const result = await deleteSupplier({ success: false, message: '' }, formData)
           setDeleting(false)
           
           if (result.success) {
@@ -92,21 +94,23 @@ export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setCreateOpen(true)}>Create Warehouse</Button>
+        <Button onClick={() => setCreateOpen(true)}>Create Supplier</Button>
       </div>
       <DataTable
         getColumns={getColumns}
         fetchDataFn={fetchData}
         exportConfig={{
-          entityName: 'warehouses',
+          entityName: 'suppliers',
           columnMapping: {
             name: 'Name',
             code: 'Code',
+            contact_person: 'Contact_person',
+            email: 'Email',
+            phone: 'Phone',
             address: 'Address',
             city: 'City',
             country: 'Country',
-            manager_name: 'Manager_name',
-            phone: 'Phone',
+            payment_terms: 'Payment_terms',
             is_active: 'Is_active'
           },
           columnWidths: [
@@ -117,9 +121,11 @@ export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
             { wch: 20 },
             { wch: 20 },
             { wch: 20 },
+            { wch: 20 },
+            { wch: 20 },
             { wch: 20 }
           ],
-          headers: ['Name', 'Code', 'Address', 'City', 'Country', 'Manager_name', 'Phone', 'Is_active']
+          headers: ['Name', 'Code', 'Contact_person', 'Email', 'Phone', 'Address', 'City', 'Country', 'Payment_terms', 'Is_active']
         }}
         idField="id"
         config={{
@@ -132,7 +138,7 @@ export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
           enableColumnVisibility: true
         }}
       />
-      <CreateWarehouseDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <CreateSupplierDialog open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   )
 }

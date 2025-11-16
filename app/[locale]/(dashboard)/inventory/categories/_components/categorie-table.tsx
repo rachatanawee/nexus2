@@ -2,31 +2,26 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/data-table/data-table'
-import { Warehouse } from '../_lib/types'
+import { Categorie } from '../_lib/types'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
-import { CreateWarehouseDialog } from './create-warehouse-dialog'
-import { deleteWarehouse } from '../_lib/actions'
+import { CreateCategorieDialog } from './create-categorie-dialog'
+import { deleteCategorie } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-interface WarehouseTableProps {
-  data: Warehouse[]
+interface CategorieTableProps {
+  data: Categorie[]
   totalItems: number
 }
 
-export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
+export function CategorieTable({ data, totalItems }: CategorieTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
 
   const getColumns = () => [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
-    { accessorKey: 'code', header: 'Code', enableSorting: true },
-    { accessorKey: 'address', header: 'Address', enableSorting: true },
-    { accessorKey: 'city', header: 'City', enableSorting: true },
-    { accessorKey: 'country', header: 'Country', enableSorting: true },
-    { accessorKey: 'manager_name', header: 'Manager_name', enableSorting: true },
-    { accessorKey: 'phone', header: 'Phone', enableSorting: true },
-    { accessorKey: 'is_active', header: 'Is_active', enableSorting: true },
+    { accessorKey: 'description', header: 'Description', enableSorting: true },
+    { accessorKey: 'icon', header: 'Icon', enableSorting: true },
     {
       accessorKey: 'created_at',
       header: 'Created',
@@ -45,7 +40,7 @@ export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
           setDeleting(true)
           const formData = new FormData()
           formData.append('id', row.original.id)
-          const result = await deleteWarehouse({ success: false, message: '' }, formData)
+          const result = await deleteCategorie({ success: false, message: '' }, formData)
           setDeleting(false)
           
           if (result.success) {
@@ -92,34 +87,24 @@ export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setCreateOpen(true)}>Create Warehouse</Button>
+        <Button onClick={() => setCreateOpen(true)}>Create Categorie</Button>
       </div>
       <DataTable
         getColumns={getColumns}
         fetchDataFn={fetchData}
         exportConfig={{
-          entityName: 'warehouses',
+          entityName: 'categories',
           columnMapping: {
             name: 'Name',
-            code: 'Code',
-            address: 'Address',
-            city: 'City',
-            country: 'Country',
-            manager_name: 'Manager_name',
-            phone: 'Phone',
-            is_active: 'Is_active'
+            description: 'Description',
+            icon: 'Icon'
           },
           columnWidths: [
             { wch: 20 },
             { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
             { wch: 20 }
           ],
-          headers: ['Name', 'Code', 'Address', 'City', 'Country', 'Manager_name', 'Phone', 'Is_active']
+          headers: ['Name', 'Description', 'Icon']
         }}
         idField="id"
         config={{
@@ -132,7 +117,7 @@ export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
           enableColumnVisibility: true
         }}
       />
-      <CreateWarehouseDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <CreateCategorieDialog open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   )
 }

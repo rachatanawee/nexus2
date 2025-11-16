@@ -11,7 +11,8 @@ Production-ready Next.js boilerplate with Supabase authentication, role-based ac
 - ✅ **Route Guards** (Middleware protection)
 - ✅ **Admin Dashboard** with collapsible sidebar & submenu
 - ✅ **User Management** - Full CRUD with role assignment
-- ✅ **TanStack Table** - Sorting, pagination, filtering
+- ✅ **TanStack Table** - Sorting, pagination, filtering, export
+- ✅ **CRUD Generator** - Auto-generate from Supabase schema
 - ✅ **shadcn/ui Components**
 - ✅ **Tailwind CSS**
 - ✅ **Feature-Colocation** - Monolith architecture pattern
@@ -192,7 +193,66 @@ See [PERMISSIONS.md](PERMISSIONS.md) for details.
 - **Language Switcher** - Switch between EN/TH
 - **Logout** - Secure logout with session cleanup
 
-## Adding New Features
+## CRUD Generator
+
+Automatically generate full CRUD features from Supabase tables.
+
+### Quick Start
+
+```bash
+# 1. Create table in Supabase
+CREATE TABLE products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  price NUMERIC(10,2),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+# 2. Generate CRUD
+bun scripts/generate-crud.js products products
+
+# 3. For sub-features (e.g., inventory/categories)
+bun scripts/generate-crud.js inventory/categories categories
+```
+
+### What Gets Generated
+
+The script automatically creates:
+- ✅ **Types** - TypeScript interfaces from schema
+- ✅ **Queries** - Server-side data fetching
+- ✅ **Actions** - Create & delete server actions
+- ✅ **Table Component** - With sorting, search, pagination, export
+- ✅ **Create Dialog** - Form with all fields
+- ✅ **Page** - Complete route with auth guard
+
+### Features
+
+- **Auto-detect fields** - Reads schema from Supabase OpenAPI
+- **Type inference** - Converts SQL types to TypeScript
+- **Required validation** - Based on NOT NULL constraints
+- **Export to Excel** - Built-in export functionality
+- **Admin-only** - Includes permission checks
+
+### Next Steps After Generation
+
+1. **Add to Sidebar** - Edit `components/sidebar.tsx`
+2. **Add Translations** - Edit `messages/en.json` and `messages/th.json`
+3. **Customize** - Modify generated files as needed
+
+### Example: Inventory System
+
+```bash
+# Generate all inventory features
+bun scripts/generate-crud.js inventory/categories categories
+bun scripts/generate-crud.js inventory/products products
+bun scripts/generate-crud.js inventory/warehouses warehouses
+bun scripts/generate-crud.js inventory/suppliers suppliers
+```
+
+See [GETTING-STARTED.md](GETTING-STARTED.md) for detailed guide.
+
+## Adding New Features Manually
 
 ### 1. Create Feature Folder
 ```bash
