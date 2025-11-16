@@ -4,7 +4,7 @@ import type { AppSetting } from './types'
 export async function getAppSettings() {
   const supabase = await createClient()
   const { data, error } = await supabase
-    .from('app_settings')
+    .from('_app_settings')
     .select('*')
     .order('category', { ascending: true })
   

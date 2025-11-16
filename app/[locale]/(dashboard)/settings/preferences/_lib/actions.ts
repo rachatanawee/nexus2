@@ -24,7 +24,7 @@ export async function updatePreferences(
   try {
     for (const [key, value] of Object.entries(updates)) {
       const { error } = await supabase
-        .from('user_preferences')
+        .from('_user_preferences')
         .upsert({
           user_id: user.id,
           key,

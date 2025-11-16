@@ -8,7 +8,7 @@ export async function getUserPreferences() {
   if (!user) return { data: null, error: 'Not authenticated' }
 
   const { data, error } = await supabase
-    .from('user_preferences')
+    .from('_user_preferences')
     .select('*')
     .eq('user_id', user.id)
     .order('category', { ascending: true })

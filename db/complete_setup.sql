@@ -1,8 +1,8 @@
 -- Complete Database Setup for Nexus Admin
 -- Run this script to set up all tables and default data
 
--- 1. Create app_settings table
-CREATE TABLE IF NOT EXISTS app_settings (
+-- 1. Create _app_settings table
+CREATE TABLE IF NOT EXISTS _app_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   key TEXT UNIQUE NOT NULL,
   value TEXT,
@@ -12,20 +12,20 @@ CREATE TABLE IF NOT EXISTS app_settings (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable RLS for app_settings
-ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
+-- Enable RLS for _app_settings
+ALTER TABLE _app_settings ENABLE ROW LEVEL SECURITY;
 
 -- Create admin-only policy (requires is_admin function)
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'is_admin') THEN
-    DROP POLICY IF EXISTS "Admin only" ON app_settings;
-    CREATE POLICY "Admin only" ON app_settings FOR ALL USING (public.is_admin());
+    DROP POLICY IF EXISTS "Admin only" ON _app_settings;
+    CREATE POLICY "Admin only" ON _app_settings FOR ALL USING (public.is_admin());
   END IF;
 END $$;
 
--- 2. Create user_preferences table
-CREATE TABLE IF NOT EXISTS user_preferences (
+-- 2. Create _user_preferences table
+CREATE TABLE IF NOT EXISTS _user_preferences (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   key TEXT NOT NULL,
@@ -38,16 +38,16 @@ CREATE TABLE IF NOT EXISTS user_preferences (
   UNIQUE(user_id, key)
 );
 
--- Enable RLS for user_preferences
-ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
+-- Enable RLS for _user_preferences
+ALTER TABLE _user_preferences ENABLE ROW LEVEL SECURITY;
 
 -- Users can only access their own preferences
-DROP POLICY IF EXISTS "Users can manage own preferences" ON user_preferences;
-CREATE POLICY "Users can manage own preferences" ON user_preferences
+DROP POLICY IF EXISTS "Users can manage own preferences" ON _user_preferences;
+CREATE POLICY "Users can manage own preferences" ON _user_preferences
   FOR ALL USING (auth.uid() = user_id);
 
--- 3. Insert app_settings data
-INSERT INTO app_settings (key, value, category, type, description) VALUES
+-- 3. Insert _app_settings data
+INSERT INTO _app_settings (key, value, category, type, description) VALUES
 -- General Settings
 ('app_title', 'Nexus Admin', 'general', 'text', 'Application title shown in browser tab'),
 ('app_description', 'Admin Dashboard', 'general', 'text', 'Application description for SEO'),
@@ -76,8 +76,8 @@ INSERT INTO app_settings (key, value, category, type, description) VALUES
 
 ON CONFLICT (key) DO NOTHING;
 
--- 4. Insert default user_preferences for existing users
-INSERT INTO user_preferences (user_id, key, value, category, type, description)
+-- 4. Insert default _user_preferences for existing users
+INSERT INTO _user_preferences (user_id, key, value, category, type, description)
 SELECT 
   id as user_id,
   unnest(ARRAY[
@@ -121,6 +121,6 @@ ON CONFLICT (user_id, key) DO NOTHING;
 DO $$
 BEGIN
   RAISE NOTICE 'Database setup completed successfully!';
-  RAISE NOTICE 'Tables created: app_settings, user_preferences';
+  RAISE NOTICE 'Tables created: _app_settings, _user_preferences';
   RAISE NOTICE 'Default data inserted for % users', (SELECT COUNT(*) FROM auth.users);
 END $$;

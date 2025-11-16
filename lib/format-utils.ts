@@ -10,7 +10,7 @@ export async function getSystemFormatSettings() {
   try {
     const supabase = createClient()
     const { data } = await supabase
-      .from('app_settings')
+      .from('_app_settings')
       .select('key, value')
       .in('key', ['date_format', 'number_format_locale', 'number_decimal_places', 'number_thousands_separator'])
     

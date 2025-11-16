@@ -24,7 +24,7 @@ export async function updateSettings(
 
   for (const [key, value] of Object.entries(updates)) {
     const { error } = await supabase
-      .from('app_settings')
+      .from('_app_settings')
       .update({ value: value as string })
       .eq('key', key)
 

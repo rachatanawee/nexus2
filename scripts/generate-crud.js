@@ -39,13 +39,13 @@ async function getTableSchema(tableName) {
     const openapi = await response.json()
     let tableDef = openapi.definitions?.[tableName]
 
-    // ถ้าไม่มีตาราง ลองใช้ user_preferences แทน
+    // ถ้าไม่มีตาราง ลองใช้ _user_preferences แทน
     if (!tableDef || !tableDef.properties) {
-      console.log('⚠️  Table not found, checking for user_preferences...')
-      const userPrefDef = openapi.definitions?.['user_preferences']
+      console.log('⚠️  Table not found, checking for _user_preferences...')
+      const userPrefDef = openapi.definitions?.['_user_preferences']
       
       if (userPrefDef && userPrefDef.properties) {
-        console.log('✅ Using user_preferences schema')
+        console.log('✅ Using _user_preferences schema')
         return getUserPreferencesFields()
       }
       
