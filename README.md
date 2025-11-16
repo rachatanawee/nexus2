@@ -13,6 +13,10 @@ Production-ready Next.js boilerplate with Supabase authentication, role-based ac
 - ✅ **User Management** - Full CRUD with role assignment
 - ✅ **TanStack Table** - Sorting, pagination, filtering, export
 - ✅ **CRUD Generator** - Auto-generate from Supabase schema
+- ✅ **App Settings & User Preferences** - Configurable system
+- ✅ **Format System** - Number/Date formatting with caching
+- ✅ **Profile Management** - User profiles with preferences
+- ✅ **System Tables** - Organized with "_" prefix
 - ✅ **shadcn/ui Components**
 - ✅ **Tailwind CSS**
 - ✅ **Feature-Colocation** - Monolith architecture pattern
@@ -78,7 +82,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-### 3. Setup Admin User
+### 3. Setup Database
+Run the complete database setup:
+```bash
+# Run in Supabase SQL Editor
+# This creates system tables and default data
+```
+Copy and run `db/complete_setup.sql` in Supabase SQL Editor.
+
+### 4. Setup Admin User
 Run the setup script to create your first admin:
 ```bash
 node setup-admin.js
@@ -93,7 +105,7 @@ Or manually via Supabase Dashboard:
 }
 ```
 
-### 4. Run Development Server
+### 5. Run Development Server
 ```bash
 bun dev
 ```
@@ -191,6 +203,8 @@ See [PERMISSIONS.md](PERMISSIONS.md) for details.
 - **Submenu** - Click Inventory to expand/collapse
 - **Active Highlighting** - Current page highlighted
 - **Language Switcher** - Switch between EN/TH
+- **Profile Access** - User profile and preferences
+- **Settings Access** - App settings (admin only)
 - **Logout** - Secure logout with session cleanup
 
 ## CRUD Generator
@@ -240,6 +254,12 @@ The script automatically creates:
 2. **Add Translations** - Edit `messages/en.json` and `messages/th.json`
 3. **Customize** - Modify generated files as needed
 
+### Format Integration
+Generated tables automatically use system format preferences:
+- **Number Formatting** - Locale, decimals, thousands separator
+- **Date Formatting** - MM/dd/yyyy, dd/MM/yyyy, yyyy-MM-dd
+- **Caching** - Preferences cached for performance
+
 ### Example: Inventory System
 
 ```bash
@@ -250,7 +270,7 @@ bun scripts/generate-crud.js inventory/warehouses warehouses
 bun scripts/generate-crud.js inventory/suppliers suppliers
 ```
 
-See [GETTING-STARTED.md](GETTING-STARTED.md) for detailed guide.
+See [docs/CRUD-GENERATOR.md](docs/CRUD-GENERATOR.md) for detailed guide.
 
 ## Adding New Features Manually
 
@@ -284,7 +304,31 @@ Edit `components/sidebar.tsx`:
 ### 4. Add Translations
 Edit `messages/en.json` and `messages/th.json`
 
-See [STRUCTURE.md](STRUCTURE.md) for detailed guide.
+See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) for detailed guide.
+
+## System Features
+
+### App Settings & User Preferences
+- **Global Settings** - Configure app title, theme, formats
+- **User Preferences** - Personal settings per user
+- **Format System** - Number/date formatting with caching
+- **Access Control** - Admin settings vs user preferences
+
+See [docs/APP-SETTINGS.md](docs/APP-SETTINGS.md) for details.
+
+### Profile Management
+- **Profile Information** - Full name, phone, bio (stored in auth.users.user_metadata)
+- **Personal Preferences** - Theme, language, notifications
+- **Settings Integration** - Uses system format preferences
+- **Route:** `/profile`
+
+### System Tables
+- **Organized Structure** - System tables use `_` prefix
+- **Clear Separation** - System vs business data
+- **Security** - Proper RLS policies
+- **Examples:** `_app_settings`, `_user_preferences`
+
+See [docs/SYSTEM-TABLES.md](docs/SYSTEM-TABLES.md) for details.
 
 ## Tech Stack
 
@@ -299,8 +343,13 @@ See [STRUCTURE.md](STRUCTURE.md) for detailed guide.
 
 ## Documentation
 
-- [STRUCTURE.md](STRUCTURE.md) - Project structure guide
-- [PERMISSIONS.md](PERMISSIONS.md) - RBAC implementation
+- [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) - Quick start guide
+- [docs/PERMISSIONS.md](docs/PERMISSIONS.md) - RBAC implementation
+- [docs/SYSTEM-TABLES.md](docs/SYSTEM-TABLES.md) - System tables documentation
+- [docs/APP-SETTINGS.md](docs/APP-SETTINGS.md) - Settings & preferences guide
+- [docs/CRUD-GENERATOR.md](docs/CRUD-GENERATOR.md) - CRUD generator documentation
+- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - Contributing guidelines
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) - Version history
 - [Supabase Docs](https://supabase.com/docs)
 - [Next.js Docs](https://nextjs.org/docs)
 
