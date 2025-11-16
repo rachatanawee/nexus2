@@ -747,7 +747,7 @@ export function DataTable<TData extends ExportableData, TValue>({
               >
                 {headerGroup.headers.map((header) => (
                   <TableHead
-                    className="px-2 py-2 relative text-left group/th"
+                    className="px-2 py-2 relative text-left group/th font-bold"
                     key={header.id}
                     colSpan={header.colSpan}
                     scope="col"
