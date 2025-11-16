@@ -26,12 +26,42 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
     setTableData(prev => prev.filter(product => product.id !== deletedId))
   }, [])
 
-  const handleEditSuccess = useCallback(() => {
-    console.log('Edit success - refreshing page')
-    // For edit, we need to refresh data since we can't easily update the specific item
-    // In a more sophisticated implementation, we'd update the specific item in state
-    window.location.reload()
+  const refreshTableData = useCallback(async () => {
+    console.log('Refreshing table data smoothly')
+    try {
+      // Make API call to refetch fresh data
+      const response = await fetch('/api/inventory/products', {
+        method: 'GET',
+        headers: {
+          'x-api-key': process.env.NEXT_PUBLIC_API_KEY || ''
+        }
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success && result.data) {
+          setTableData(result.data)
+          console.log('Table data refreshed successfully')
+        }
+      } else {
+        throw new Error('API call failed')
+      }
+    } catch (error) {
+      console.error('Failed to refresh table data:', error)
+      // Fallback to page reload
+      window.location.reload()
+    }
   }, [])
+
+  const handleCreateSuccess = useCallback(() => {
+    console.log('Create success - refreshing table data')
+    refreshTableData()
+  }, [refreshTableData])
+
+  const handleEditSuccess = useCallback(() => {
+    console.log('Edit success - refreshing table data')
+    refreshTableData()
+  }, [refreshTableData])
 
   const getColumns = useCallback((): ColumnDef<Product, unknown>[] => [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
@@ -162,7 +192,12 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
           enableColumnVisibility: true
         }}
       />
-      <ProductFormDialog open={createOpen} onOpenChange={setCreateOpen} product={null} />
+      <ProductFormDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        product={null}
+        onSuccess={handleCreateSuccess}
+      />
       <ProductFormDialog
         open={!!editProduct}
         onOpenChange={(open) => {
