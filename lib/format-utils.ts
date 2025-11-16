@@ -5,12 +5,31 @@ import { createClient } from '@/lib/supabase/client'
 export async function getSystemFormatSettings() {
   try {
     const supabase = createClient()
-    const { data } = await supabase
+    
+    // Get user preferences first
+    const { data: { user } } = await supabase.auth.getUser()
+    let userPrefs = {}
+    
+    if (user) {
+      const { data: prefs } = await supabase
+        .from('_user_preferences')
+        .select('key, value')
+        .eq('user_id', user.id)
+        .in('key', ['date_format', 'number_format_locale', 'number_decimal_places', 'number_thousands_separator'])
+      
+      userPrefs = prefs?.reduce((acc, p) => ({ ...acc, [p.key]: p.value }), {}) || {}
+    }
+    
+    // Get app settings as fallback
+    const { data: appSettings } = await supabase
       .from('_app_settings')
       .select('key, value')
       .in('key', ['date_format', 'number_format_locale', 'number_decimal_places', 'number_thousands_separator'])
     
-    return data?.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {}) || {}
+    const systemSettings = appSettings?.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {}) || {}
+    
+    // User preferences override system settings
+    return { ...systemSettings, ...userPrefs }
   } catch {
     return {}
   }

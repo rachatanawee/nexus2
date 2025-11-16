@@ -1,8 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
-import { isAdmin } from '@/lib/permissions'
 
 type FormState = {
   success: boolean
@@ -13,50 +11,123 @@ export async function createProduct(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    const supabase = await createClient()
 
-  if (!user || !isAdmin(user)) {
-    return { success: false, message: 'Access Denied' }
+    const name = formData.get('name') as string
+    if (!name) return { success: false, message: 'Name is required' }
+    
+    const sku = formData.get('sku') as string
+    if (!sku) return { success: false, message: 'Sku is required' }
+    
+    const description = formData.get('description') as string
+    const category_id = formData.get('category_id') as string
+    
+    const priceStr = formData.get('price') as string
+    const price = parseFloat(priceStr)
+    if (!priceStr || isNaN(price)) return { success: false, message: 'Valid price is required' }
+    
+    const costStr = formData.get('cost') as string
+    const cost = parseFloat(costStr)
+    if (!costStr || isNaN(cost)) return { success: false, message: 'Valid cost is required' }
+    
+    const stockStr = formData.get('stock_quantity') as string
+    const stock_quantity = parseInt(stockStr)
+    if (!stockStr || isNaN(stock_quantity)) return { success: false, message: 'Valid stock quantity is required' }
+    
+    const min_stock_level = formData.get('min_stock_level') as string
+    const image_url = formData.get('image_url') as string
+    const is_active = formData.get('is_active') as string
+
+    const insertData = {
+      name,
+      sku,
+      description: description || null,
+      category_id: category_id || null,
+      price,
+      cost,
+      stock_quantity,
+      min_stock_level: min_stock_level ? parseInt(min_stock_level) : null,
+      image_url: image_url || null,
+      is_active: Boolean(is_active && is_active !== 'false')
+    }
+
+    const { error } = await supabase.from('products').insert(insertData)
+    
+    if (error) {
+      console.error('Insert error:', error)
+      return { success: false, message: error.message }
+    }
+
+    return { success: true, message: 'Product created successfully' }
+
+  } catch (err) {
+    console.error('Action error:', err)
+    return { success: false, message: 'Unexpected error occurred' }
   }
+}
 
-  const name = formData.get('name') as string
-  if (!name) return { success: false, message: 'Name is required' }
-  const sku = formData.get('sku') as string
-  if (!sku) return { success: false, message: 'Sku is required' }
-  const description = formData.get('description') as string
-  if (false) return { success: false, message: 'Description is required' }
-  const category_id = formData.get('category_id') as string
-  if (false) return { success: false, message: 'Category_id is required' }
-  const price = formData.get('price') as string
-  if (!price) return { success: false, message: 'Price is required' }
-  const cost = formData.get('cost') as string
-  if (!cost) return { success: false, message: 'Cost is required' }
-  const stock_quantity = formData.get('stock_quantity') as string
-  if (!stock_quantity) return { success: false, message: 'Stock_quantity is required' }
-  const min_stock_level = formData.get('min_stock_level') as string
-  if (false) return { success: false, message: 'Min_stock_level is required' }
-  const image_url = formData.get('image_url') as string
-  if (false) return { success: false, message: 'Image_url is required' }
-  const is_active = formData.get('is_active') as string
-  if (false) return { success: false, message: 'Is_active is required' }
+export async function updateProduct(
+  prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  try {
+    const supabase = await createClient()
 
-  const { error } = await supabase.from('products').insert({
-    name,
-    sku,
-    description,
-    category_id,
-    price,
-    cost,
-    stock_quantity,
-    min_stock_level,
-    image_url,
-    is_active
-  })
-  if (error) return { success: false, message: error.message }
+    const id = formData.get('id') as string
+    if (!id) return { success: false, message: 'ID is required' }
 
-  revalidatePath('/inventory/products')
-  return { success: true, message: 'Product created successfully' }
+    const name = formData.get('name') as string
+    if (!name) return { success: false, message: 'Name is required' }
+    
+    const sku = formData.get('sku') as string
+    if (!sku) return { success: false, message: 'Sku is required' }
+    
+    const description = formData.get('description') as string
+    const category_id = formData.get('category_id') as string
+    
+    const priceStr = formData.get('price') as string
+    const price = parseFloat(priceStr)
+    if (!priceStr || isNaN(price)) return { success: false, message: 'Valid price is required' }
+    
+    const costStr = formData.get('cost') as string
+    const cost = parseFloat(costStr)
+    if (!costStr || isNaN(cost)) return { success: false, message: 'Valid cost is required' }
+    
+    const stockStr = formData.get('stock_quantity') as string
+    const stock_quantity = parseInt(stockStr)
+    if (!stockStr || isNaN(stock_quantity)) return { success: false, message: 'Valid stock quantity is required' }
+    
+    const min_stock_level = formData.get('min_stock_level') as string
+    const image_url = formData.get('image_url') as string
+    const is_active = formData.get('is_active') as string
+
+    const updateData = {
+      name,
+      sku,
+      description: description || null,
+      category_id: category_id || null,
+      price,
+      cost,
+      stock_quantity,
+      min_stock_level: min_stock_level ? parseInt(min_stock_level) : null,
+      image_url: image_url || null,
+      is_active: Boolean(is_active && is_active !== 'false')
+    }
+
+    const { error } = await supabase.from('products').update(updateData).eq('id', id)
+    
+    if (error) {
+      console.error('Update error:', error)
+      return { success: false, message: error.message }
+    }
+
+    return { success: true, message: 'Product updated successfully' }
+
+  } catch (err) {
+    console.error('Action error:', err)
+    return { success: false, message: 'Unexpected error occurred' }
+  }
 }
 
 export async function deleteProduct(
@@ -64,11 +135,6 @@ export async function deleteProduct(
   formData: FormData
 ): Promise<FormState> {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user || !isAdmin(user)) {
-    return { success: false, message: 'Access Denied' }
-  }
 
   const id = formData.get('id') as string
   if (!id) return { success: false, message: 'ID is required' }
@@ -76,6 +142,5 @@ export async function deleteProduct(
   const { error } = await supabase.from('products').delete().eq('id', id)
   if (error) return { success: false, message: error.message }
 
-  revalidatePath('/inventory/products')
   return { success: true, message: 'Product deleted successfully' }
 }

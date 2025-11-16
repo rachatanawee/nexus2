@@ -224,7 +224,7 @@ export function formatNumber(value: number, settings?: any) {
 }
 
 export function formatDate(date: Date, settings?: any) {
-  const dateFormat = settings?.date_format || 'dd/MM/yyyy'
+  const dateFormat = settings?.date_format || 'MM/dd/yyyy'
   return formatSystemDate(date, dateFormat)
 }
 `)
@@ -362,7 +362,7 @@ ${fields.map(() => '            { wch: 20 }').join(',\n')}
 }
 `)
 
-// create dialog
+// create dialog - แก้ไขให้มี Cancel button และ input types
 fs.writeFileSync(`${basePath}/_components/create-${singular}-dialog.tsx`, `'use client'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -370,9 +370,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { create${Feature} } from '../_lib/actions'
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { useEffect } from 'react'
 
 interface Create${Feature}DialogProps {
   open: boolean
@@ -380,7 +379,7 @@ interface Create${Feature}DialogProps {
 }
 
 export function Create${Feature}Dialog({ open, onOpenChange }: Create${Feature}DialogProps) {
-  const [state, formAction] = useActionState(create${Feature}, { success: false, message: '' })
+  const [state, formAction, isPending] = useActionState(create${Feature}, { success: false, message: '' })
 
   useEffect(() => {
     if (state.success) {
@@ -399,20 +398,26 @@ export function Create${Feature}Dialog({ open, onOpenChange }: Create${Feature}D
           <DialogTitle>Create ${Feature}</DialogTitle>
         </DialogHeader>
         <form action={formAction} className="space-y-4">
-${fields.map(f => `          <div>
+${fields.map(f => {
+  const inputType = f.type.includes('int') || f.type.includes('numeric') ? 'number' : 'text'
+  const stepAttr = f.type.includes('numeric') && !f.type.includes('int') ? ' step="0.01"' : ''
+  return `          <div>
             <Label htmlFor="${f.name}">${capitalize(f.name)}${f.required ? ' *' : ''}</Label>
             <Input
               id="${f.name}"
               name="${f.name}"
-              type="${f.type.includes('int') || f.type.includes('numeric') ? 'number' : 'text'}"
+              type="${inputType}"${stepAttr}
               required={${f.required}}
             />
-          </div>`).join('\n')}
+          </div>`
+}).join('\n')}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Create</Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? 'Creating...' : 'Create'}
+            </Button>
           </div>
         </form>
       </DialogContent>

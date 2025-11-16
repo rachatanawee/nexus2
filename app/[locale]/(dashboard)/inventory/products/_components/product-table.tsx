@@ -4,10 +4,10 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/data-table/data-table'
 import { Product } from '../_lib/types'
 import { Button } from '@/components/ui/button'
-import { useState, useEffect } from 'react'
-import { CreateProductDialog } from './create-product-dialog'
+import { useState, useCallback } from 'react'
+import { ProductFormDialog } from './product-form-dialog'
 import { deleteProduct } from '../_lib/actions'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatNumber, formatDate, useFormatSettings } from '../_lib/format'
 
@@ -18,88 +18,93 @@ interface ProductTableProps {
 
 export function ProductTable({ data, totalItems }: ProductTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
+  const [editProduct, setEditProduct] = useState<Product | null>(null)
+  const [tableData, setTableData] = useState(data)
   const formatSettings = useFormatSettings()
 
-  console.log('Format Settings:', formatSettings) // Debug
+  const handleDeleteSuccess = useCallback((deletedId: string) => {
+    setTableData(prev => prev.filter(product => product.id !== deletedId))
+  }, [])
 
-  const getColumns = () => [
+  const handleEditSuccess = useCallback(() => {
+    console.log('Edit success - refreshing page')
+    // For edit, we need to refresh data since we can't easily update the specific item
+    // In a more sophisticated implementation, we'd update the specific item in state
+    window.location.reload()
+  }, [])
+
+  const getColumns = useCallback((): ColumnDef<Product, unknown>[] => [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
-    { accessorKey: 'sku', header: 'Sku', enableSorting: true },
-    { accessorKey: 'description', header: 'Description', enableSorting: true },
-    { accessorKey: 'category_id', header: 'Category_id', enableSorting: true },
-    { 
-      accessorKey: 'price', 
-      header: 'Price', 
+    { accessorKey: 'sku', header: 'SKU', enableSorting: true },
+    {
+      accessorKey: 'price',
+      header: 'Price',
       enableSorting: true,
-      cell: ({ row }: any) => formatNumber(row.original.price, formatSettings)
+      cell: ({ row }) => `$${formatNumber(row.original.price || 0, formatSettings)}`
     },
-    { 
-      accessorKey: 'cost', 
-      header: 'Cost', 
+    {
+      accessorKey: 'cost',
+      header: 'Cost',
       enableSorting: true,
-      cell: ({ row }: any) => formatNumber(row.original.cost, formatSettings)
+      cell: ({ row }) => `$${formatNumber(row.original.cost || 0, formatSettings)}`
     },
-    { 
-      accessorKey: 'stock_quantity', 
-      header: 'Stock_quantity', 
+    {
+      accessorKey: 'stock_quantity',
+      header: 'Stock',
       enableSorting: true,
-      cell: ({ row }: any) => formatNumber(row.original.stock_quantity, formatSettings)
+      cell: ({ row }) => formatNumber(row.original.stock_quantity || 0, formatSettings)
     },
-    { 
-      accessorKey: 'min_stock_level', 
-      header: 'Min_stock_level', 
-      enableSorting: true,
-      cell: ({ row }: any) => formatNumber(row.original.min_stock_level, formatSettings)
-    },
-    { accessorKey: 'image_url', header: 'Image_url', enableSorting: true },
-    { accessorKey: 'is_active', header: 'Is_active', enableSorting: true },
     {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => {
-        console.log('Date format:', formatSettings?.date_format) // Debug
-        return formatDate(new Date(row.original.created_at), formatSettings)
-      }
+      cell: ({ row }) => formatDate(new Date(row.original.created_at), formatSettings)
     },
     {
       id: 'actions',
       header: 'Actions',
       enableSorting: false,
-      cell: ({ row }: any) => {
-        const [deleting, setDeleting] = useState(false)
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setEditProduct(row.original)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              if (!confirm(`Delete ${row.original.name}?`)) return
 
-        const handleDelete = async () => {
-          if (!confirm(`Delete ${row.original.name}?`)) return
-          setDeleting(true)
-          const formData = new FormData()
-          formData.append('id', row.original.id)
-          const result = await deleteProduct({ success: false, message: '' }, formData)
-          setDeleting(false)
-          
-          if (result.success) {
-            toast.success(result.message)
-            window.location.reload()
-          } else {
-            toast.error(result.message)
-          }
-        }
+              const formData = new FormData()
+              formData.append('id', row.original.id)
+              const result = await deleteProduct({ success: false, message: '' }, formData)
 
-        return (
-          <Button variant="outline" size="sm" onClick={handleDelete} disabled={deleting}>
+              if (result.success) {
+                toast.success(result.message)
+                handleDeleteSuccess(row.original.id)
+              } else {
+                toast.error(result.message)
+              }
+            }}
+          >
             <Trash2 className="h-4 w-4" />
           </Button>
-        )
-      }
+        </div>
+      )
     }
-  ]
+  ], [formatSettings, handleDeleteSuccess])
 
-  const fetchData = async (params: any) => {
-    let filtered = [...data]
+  const fetchData = useCallback(async (params: any) => {
+    let filtered = [...tableData]
 
     if (params.search) {
       filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(params.search.toLowerCase())
+        item.name.toLowerCase().includes(params.search.toLowerCase()) ||
+        item.sku.toLowerCase().includes(params.search.toLowerCase())
       )
     }
 
@@ -116,7 +121,7 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
         total_items: filtered.length
       }
     }
-  }
+  }, [tableData])
 
   return (
     <div className="space-y-4">
@@ -130,29 +135,21 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
           entityName: 'products',
           columnMapping: {
             name: 'Name',
-            sku: 'Sku',
-            description: 'Description',
-            category_id: 'Category_id',
+            sku: 'SKU',
             price: 'Price',
             cost: 'Cost',
-            stock_quantity: 'Stock_quantity',
-            min_stock_level: 'Min_stock_level',
-            image_url: 'Image_url',
-            is_active: 'Is_active'
+            stock_quantity: 'Stock Quantity',
+            created_at: 'Created'
           },
           columnWidths: [
+            { wch: 25 },
             { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
+            { wch: 15 },
+            { wch: 15 },
+            { wch: 15 },
             { wch: 20 }
           ],
-          headers: ['Name', 'Sku', 'Description', 'Category_id', 'Price', 'Cost', 'Stock_quantity', 'Min_stock_level', 'Image_url', 'Is_active']
+          headers: ['Name', 'SKU', 'Price', 'Cost', 'Stock Quantity', 'Created']
         }}
         idField="id"
         config={{
@@ -165,7 +162,15 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
           enableColumnVisibility: true
         }}
       />
-      <CreateProductDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <ProductFormDialog open={createOpen} onOpenChange={setCreateOpen} product={null} />
+      <ProductFormDialog
+        open={!!editProduct}
+        onOpenChange={(open) => {
+          if (!open) setEditProduct(null)
+        }}
+        product={editProduct}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   )
 }

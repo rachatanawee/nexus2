@@ -1,4 +1,6 @@
-export type Product = {
+import type { ExportableData } from '@/components/data-table/utils/export-utils'
+
+export type Product = ExportableData & {
   id: string
   name: string
   sku: string
@@ -12,7 +14,6 @@ export type Product = {
   is_active: boolean | null
   created_at: string
   updated_at: string
-  [key: string]: unknown
 }
 
 export type ProductInsert = Omit<Product, 'id' | 'created_at' | 'updated_at'>
