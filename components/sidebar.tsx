@@ -82,7 +82,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             </div>
           )}
         </div>
-        <Link href="#" className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 hover:bg-[hsl(var(--color-accent))] ${collapsed ? 'justify-center' : ''}`}>
+        <Link href={`/${locale}/settings`} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/settings` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'} ${collapsed ? 'justify-center' : ''}`}>
           <Settings className="h-5 w-5" />
           {!collapsed && t('settings')}
         </Link>
