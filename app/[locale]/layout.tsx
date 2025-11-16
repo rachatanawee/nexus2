@@ -3,6 +3,7 @@ import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { Toaster } from '@/components/toaster'
 import { SettingsProvider } from '@/lib/settings-context'
+import { PreferencesProvider } from '@/lib/preferences-context'
 import { createClient } from '@/lib/supabase/server'
 import '../globals.css'
 
@@ -42,10 +43,12 @@ export default async function LocaleLayout({
       </head>
       <body>
         <SettingsProvider settings={settings}>
-          <NextIntlClientProvider messages={messages}>
-            {children}
-            <Toaster />
-          </NextIntlClientProvider>
+          <PreferencesProvider>
+            <NextIntlClientProvider messages={messages}>
+              {children}
+              <Toaster />
+            </NextIntlClientProvider>
+          </PreferencesProvider>
         </SettingsProvider>
       </body>
     </html>

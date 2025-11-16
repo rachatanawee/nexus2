@@ -10,6 +10,7 @@ import { useState, useActionState, useEffect, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Settings, Palette, Sliders, Save, RotateCcw } from 'lucide-react'
 import type { AppSetting } from '../_lib/types'
+import { usePreferences } from '@/lib/preferences-context'
 
 interface SettingsFormProps {
   settings: AppSetting[]
@@ -28,6 +29,7 @@ const categoryLabels = {
 }
 
 export function SettingsForm({ settings }: SettingsFormProps) {
+  const { refreshSettings } = usePreferences()
   const initialValues = settings.reduce((acc, s) => ({ ...acc, [s.key]: s.value || '' }), {})
   const [values, setValues] = useState<Record<string, string>>(initialValues)
   const [hasChanges, setHasChanges] = useState(false)
@@ -42,10 +44,12 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     if (state.success) {
       toast.success(state.message)
       setHasChanges(false)
+      // Refresh cached preferences
+      refreshSettings()
     } else if (state.message) {
       toast.error(state.message)
     }
-  }, [state])
+  }, [state, refreshSettings])
 
   const handleChange = (key: string, value: string) => {
     setValues({ ...values, [key]: value })

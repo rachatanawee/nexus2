@@ -2,11 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-let cachedSettings: any = null
-
 export async function getSystemFormatSettings() {
-  if (cachedSettings) return cachedSettings
-  
   try {
     const supabase = createClient()
     const { data } = await supabase
@@ -14,8 +10,7 @@ export async function getSystemFormatSettings() {
       .select('key, value')
       .in('key', ['date_format', 'number_format_locale', 'number_decimal_places', 'number_thousands_separator'])
     
-    cachedSettings = data?.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {}) || {}
-    return cachedSettings
+    return data?.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {}) || {}
   } catch {
     return {}
   }

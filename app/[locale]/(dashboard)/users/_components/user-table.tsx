@@ -10,6 +10,7 @@ import { CreateUserDialog } from './create-user-dialog'
 import { deleteUser } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatDate, useFormatSettings } from '../_lib/format'
 
 interface UserTableProps {
   data: User[]
@@ -18,6 +19,7 @@ interface UserTableProps {
 
 export function UserTable({ data, totalItems }: UserTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
+  const formatSettings = useFormatSettings()
 
   const getColumns = () => [
     { 
@@ -33,6 +35,12 @@ export function UserTable({ data, totalItems }: UserTableProps) {
         const roles = row.original.roles
         return roles.length > 0 ? roles.join(', ') : 'No roles'
       }
+    },
+    {
+      accessorKey: 'created_at',
+      header: 'Created',
+      enableSorting: true,
+      cell: ({ row }: any) => formatDate(new Date(row.original.created_at), formatSettings)
     },
     {
       id: 'actions',
@@ -140,13 +148,15 @@ export function UserTable({ data, totalItems }: UserTableProps) {
           entityName: 'users',
           columnMapping: {
             email: 'Email',
-            roles: 'Roles'
+            roles: 'Roles',
+            created_at: 'Created'
           },
           columnWidths: [
             { wch: 30 },
-            { wch: 20 }
+            { wch: 20 },
+            { wch: 15 }
           ],
-          headers: ['Email', 'Roles']
+          headers: ['Email', 'Roles', 'Created']
         }}
         idField="id"
         config={{
