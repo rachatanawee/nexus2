@@ -32,6 +32,5 @@ export async function updateSettings(
   }
 
   revalidatePath('/settings')
-  // Trigger client-side preferences refresh via custom event
-  return { success: true, message: 'Settings saved successfully', refresh: true }
+  return { success: true, message: 'Settings saved successfully' }
 }

@@ -196,7 +196,7 @@ export function PreferencesForm({ preferences }: PreferencesFormProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {categoryPreferences.map(preference => (
+              {categoryPreferences.map((preference: any) => (
                 <div key={preference.id} className="space-y-2">
                   <Label htmlFor={preference.key} className="flex items-center justify-between">
                     <span className="font-medium">

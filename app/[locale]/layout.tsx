@@ -11,9 +11,9 @@ const locales = ['en', 'th']
 
 async function getAppSettings() {
   const supabase = await createClient()
-  const { data } = await supabase.from('app_settings').select('key, value')
+  const { data } = await supabase.from('_app_settings').select('key, value')
   const { data: { user } } = await supabase.auth.getUser()
-  const settings = data?.reduce((acc, { key, value }) => ({ ...acc, [key]: value || '' }), {}) || {}
+  const settings = data?.reduce((acc, { key, value }) => ({ ...acc, [key]: value || '' }), {} as Record<string, string>) || {}
   return { ...settings, user_email: user?.email || '' }
 }
 
@@ -36,9 +36,9 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <head>
-        <title>{settings.app_title || 'Nexus Admin'}</title>
-        <meta name="description" content={settings.app_description || 'Admin Dashboard'} />
-        {settings.favicon_url && <link rel="icon" href={settings.favicon_url} />}
+        <title>{(settings as any).app_title || 'Nexus Admin'}</title>
+        <meta name="description" content={(settings as any).app_description || 'Admin Dashboard'} />
+        {(settings as any).favicon_url && <link rel="icon" href={(settings as any).favicon_url} />}
 
       </head>
       <body>
