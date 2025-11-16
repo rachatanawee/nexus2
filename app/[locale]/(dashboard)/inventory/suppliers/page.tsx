@@ -6,7 +6,7 @@ export default async function SuppliersPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Suppliers</h1>
+      <h1 className="text-2xl font-bold text-primary">Suppliers</h1>
       <SupplierTable data={items || []} totalItems={items?.length || 0} />
     </div>
   )

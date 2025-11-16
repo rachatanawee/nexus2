@@ -13,5 +13,6 @@ export function formatNumber(value: number, settings?: any) {
 }
 
 export function formatDate(date: Date, settings?: any) {
-  return formatSystemDate(date, settings?.date_format)
+  const dateFormat = settings?.date_format || 'MM/dd/yyyy'
+  return formatSystemDate(date, dateFormat)
 }

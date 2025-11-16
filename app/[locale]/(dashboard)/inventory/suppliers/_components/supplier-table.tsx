@@ -1,15 +1,15 @@
 'use client'
 
-import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/data-table/data-table'
 import { Supplier } from '../_lib/types'
 import { Button } from '@/components/ui/button'
-import { useState, useEffect } from 'react'
-import { CreateSupplierDialog } from './create-supplier-dialog'
+import { useState } from 'react'
+import { SupplierFormDialog } from './supplier-form-dialog'
 import { deleteSupplier } from '../_lib/actions'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatNumber, formatDate, useFormatSettings } from '../_lib/format'
+import { useRouter } from 'next/navigation'
 
 interface SupplierTableProps {
   data: Supplier[]
@@ -17,7 +17,9 @@ interface SupplierTableProps {
 }
 
 export function SupplierTable({ data, totalItems }: SupplierTableProps) {
+  const router = useRouter()
   const [createOpen, setCreateOpen] = useState(false)
+  const [editSupplier, setEditSupplier] = useState<Supplier | null>(null)
   const formatSettings = useFormatSettings()
 
   const getColumns = () => [
@@ -26,11 +28,6 @@ export function SupplierTable({ data, totalItems }: SupplierTableProps) {
     { accessorKey: 'contact_person', header: 'Contact_person', enableSorting: true },
     { accessorKey: 'email', header: 'Email', enableSorting: true },
     { accessorKey: 'phone', header: 'Phone', enableSorting: true },
-    { accessorKey: 'address', header: 'Address', enableSorting: true },
-    { accessorKey: 'city', header: 'City', enableSorting: true },
-    { accessorKey: 'country', header: 'Country', enableSorting: true },
-    { accessorKey: 'payment_terms', header: 'Payment_terms', enableSorting: true },
-    { accessorKey: 'is_active', header: 'Is_active', enableSorting: true },
     {
       accessorKey: 'created_at',
       header: 'Created',
@@ -41,31 +38,29 @@ export function SupplierTable({ data, totalItems }: SupplierTableProps) {
       id: 'actions',
       header: 'Actions',
       enableSorting: false,
-      cell: ({ row }: any) => {
-        const [deleting, setDeleting] = useState(false)
+      cell: ({ row }: any) => (
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setEditSupplier(row.original)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={async () => {
+            if (!confirm(`Delete ${row.original.name}?`)) return
 
-        const handleDelete = async () => {
-          if (!confirm(`Delete ${row.original.name}?`)) return
-          setDeleting(true)
-          const formData = new FormData()
-          formData.append('id', row.original.id)
-          const result = await deleteSupplier({ success: false, message: '' }, formData)
-          setDeleting(false)
-          
-          if (result.success) {
-            toast.success(result.message)
-            window.location.reload()
-          } else {
-            toast.error(result.message)
-          }
-        }
+            const formData = new FormData()
+            formData.append('id', row.original.id)
+            const result = await deleteSupplier({ success: false, message: '' }, formData)
 
-        return (
-          <Button variant="outline" size="sm" onClick={handleDelete} disabled={deleting}>
+            if (result.success) {
+              toast.success(result.message)
+              router.refresh()
+            } else {
+              toast.error(result.message)
+            }
+          }}>
             <Trash2 className="h-4 w-4" />
           </Button>
-        )
-      }
+        </div>
+      )
     }
   ]
 
@@ -74,7 +69,7 @@ export function SupplierTable({ data, totalItems }: SupplierTableProps) {
 
     if (params.search) {
       filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(params.search.toLowerCase())
+        item.name.toString().toLowerCase().includes(params.search.toLowerCase())
       )
     }
 
@@ -108,26 +103,16 @@ export function SupplierTable({ data, totalItems }: SupplierTableProps) {
             code: 'Code',
             contact_person: 'Contact_person',
             email: 'Email',
-            phone: 'Phone',
-            address: 'Address',
-            city: 'City',
-            country: 'Country',
-            payment_terms: 'Payment_terms',
-            is_active: 'Is_active'
+            phone: 'Phone'
           },
           columnWidths: [
             { wch: 20 },
             { wch: 20 },
             { wch: 20 },
             { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
-            { wch: 20 },
             { wch: 20 }
           ],
-          headers: ['Name', 'Code', 'Contact_person', 'Email', 'Phone', 'Address', 'City', 'Country', 'Payment_terms', 'Is_active']
+          headers: ['Name', 'Code', 'Contact_person', 'Email', 'Phone']
         }}
         idField="id"
         config={{
@@ -140,7 +125,8 @@ export function SupplierTable({ data, totalItems }: SupplierTableProps) {
           enableColumnVisibility: true
         }}
       />
-      <CreateSupplierDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <SupplierFormDialog open={createOpen} onOpenChange={setCreateOpen} supplier={null} />
+      <SupplierFormDialog open={!!editSupplier} onOpenChange={(open) => !open && setEditSupplier(null)} supplier={editSupplier} />
     </div>
   )
 }

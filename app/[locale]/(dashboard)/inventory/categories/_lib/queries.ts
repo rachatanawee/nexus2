@@ -11,15 +11,3 @@ export async function getCategories() {
   if (error) return { data: null, error }
   return { data: data as Categorie[], error: null }
 }
-
-export async function getCategorieById(id: string) {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .eq('id', id)
-    .single()
-  
-  if (error) return { data: null, error }
-  return { data: data as Categorie, error: null }
-}

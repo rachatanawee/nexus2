@@ -1,15 +1,15 @@
 'use client'
 
-import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/data-table/data-table'
 import { Categorie } from '../_lib/types'
 import { Button } from '@/components/ui/button'
-import { useState, useEffect } from 'react'
-import { CreateCategorieDialog } from './create-categorie-dialog'
+import { useState } from 'react'
+import { CategorieFormDialog } from './categorie-form-dialog'
 import { deleteCategorie } from '../_lib/actions'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatNumber, formatDate, useFormatSettings } from '../_lib/format'
+import { useRouter } from 'next/navigation'
 
 interface CategorieTableProps {
   data: Categorie[]
@@ -17,7 +17,9 @@ interface CategorieTableProps {
 }
 
 export function CategorieTable({ data, totalItems }: CategorieTableProps) {
+  const router = useRouter()
   const [createOpen, setCreateOpen] = useState(false)
+  const [editCategorie, setEditCategorie] = useState<Categorie | null>(null)
   const formatSettings = useFormatSettings()
 
   const getColumns = () => [
@@ -28,40 +30,35 @@ export function CategorieTable({ data, totalItems }: CategorieTableProps) {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => {
-        const date = new Date(row.original.created_at)
-        return formatSettings?.date_format ? formatDate(date, formatSettings) : date.toLocaleDateString()
-      }
+      cell: ({ row }: any) => formatDate(new Date(row.original.created_at), formatSettings)
     },
     {
       id: 'actions',
       header: 'Actions',
       enableSorting: false,
-      cell: ({ row }: any) => {
-        const [deleting, setDeleting] = useState(false)
+      cell: ({ row }: any) => (
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setEditCategorie(row.original)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={async () => {
+            if (!confirm(`Delete ${row.original.name}?`)) return
 
-        const handleDelete = async () => {
-          if (!confirm(`Delete ${row.original.name}?`)) return
-          setDeleting(true)
-          const formData = new FormData()
-          formData.append('id', row.original.id)
-          const result = await deleteCategorie({ success: false, message: '' }, formData)
-          setDeleting(false)
-          
-          if (result.success) {
-            toast.success(result.message)
-            window.location.reload()
-          } else {
-            toast.error(result.message)
-          }
-        }
+            const formData = new FormData()
+            formData.append('id', row.original.id)
+            const result = await deleteCategorie({ success: false, message: '' }, formData)
 
-        return (
-          <Button variant="outline" size="sm" onClick={handleDelete} disabled={deleting}>
+            if (result.success) {
+              toast.success(result.message)
+              router.refresh()
+            } else {
+              toast.error(result.message)
+            }
+          }}>
             <Trash2 className="h-4 w-4" />
           </Button>
-        )
-      }
+        </div>
+      )
     }
   ]
 
@@ -70,7 +67,7 @@ export function CategorieTable({ data, totalItems }: CategorieTableProps) {
 
     if (params.search) {
       filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(params.search.toLowerCase())
+        item.name.toString().toLowerCase().includes(params.search.toLowerCase())
       )
     }
 
@@ -122,7 +119,8 @@ export function CategorieTable({ data, totalItems }: CategorieTableProps) {
           enableColumnVisibility: true
         }}
       />
-      <CreateCategorieDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <CategorieFormDialog open={createOpen} onOpenChange={setCreateOpen} categorie={null} />
+      <CategorieFormDialog open={!!editCategorie} onOpenChange={(open) => !open && setEditCategorie(null)} categorie={editCategorie} />
     </div>
   )
 }

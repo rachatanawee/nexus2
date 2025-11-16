@@ -103,7 +103,7 @@ CREATE INDEX idx_stock_movements_product ON stock_movements(product_id);
 CREATE INDEX idx_stock_movements_warehouse ON stock_movements(warehouse_id);
 CREATE INDEX idx_stock_movements_created ON stock_movements(created_at DESC);
 
--- RLS Policies (Admin only)
+-- Enable RLS
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE warehouses ENABLE ROW LEVEL SECURITY;
@@ -112,29 +112,47 @@ ALTER TABLE stock_movements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE suppliers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_suppliers ENABLE ROW LEVEL SECURITY;
 
--- Helper function for RLS
-CREATE OR REPLACE FUNCTION auth.user_has_role(required_role text)
-RETURNS boolean AS $$
-BEGIN
-  RETURN (
-    SELECT required_role = ANY(
-      COALESCE(
-        (auth.jwt() -> 'app_metadata' -> 'roles')::jsonb::text[],
-        '{}'::text[]
-      )
-    )
-  );
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+-- RLS Policies for categories
+CREATE POLICY "Users can read categories" ON categories FOR SELECT TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can insert categories" ON categories FOR INSERT TO public WITH CHECK (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can update categories" ON categories FOR UPDATE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can delete categories" ON categories FOR DELETE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
 
--- Admin policies
-CREATE POLICY "Admin full access categories" ON categories FOR ALL USING (auth.user_has_role('admin'));
-CREATE POLICY "Admin full access products" ON products FOR ALL USING (auth.user_has_role('admin'));
-CREATE POLICY "Admin full access warehouses" ON warehouses FOR ALL USING (auth.user_has_role('admin'));
-CREATE POLICY "Admin full access warehouse_stock" ON warehouse_stock FOR ALL USING (auth.user_has_role('admin'));
-CREATE POLICY "Admin full access stock_movements" ON stock_movements FOR ALL USING (auth.user_has_role('admin'));
-CREATE POLICY "Admin full access suppliers" ON suppliers FOR ALL USING (auth.user_has_role('admin'));
-CREATE POLICY "Admin full access product_suppliers" ON product_suppliers FOR ALL USING (auth.user_has_role('admin'));
+-- RLS Policies for products
+CREATE POLICY "Users can read products" ON products FOR SELECT TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can insert products" ON products FOR INSERT TO public WITH CHECK (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can update products" ON products FOR UPDATE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can delete products" ON products FOR DELETE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+
+-- RLS Policies for warehouses
+CREATE POLICY "Users can read warehouses" ON warehouses FOR SELECT TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can insert warehouses" ON warehouses FOR INSERT TO public WITH CHECK (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can update warehouses" ON warehouses FOR UPDATE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can delete warehouses" ON warehouses FOR DELETE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+
+-- RLS Policies for warehouse_stock
+CREATE POLICY "Users can read warehouse_stock" ON warehouse_stock FOR SELECT TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can insert warehouse_stock" ON warehouse_stock FOR INSERT TO public WITH CHECK (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can update warehouse_stock" ON warehouse_stock FOR UPDATE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can delete warehouse_stock" ON warehouse_stock FOR DELETE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+
+-- RLS Policies for stock_movements
+CREATE POLICY "Users can read stock_movements" ON stock_movements FOR SELECT TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can insert stock_movements" ON stock_movements FOR INSERT TO public WITH CHECK (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can update stock_movements" ON stock_movements FOR UPDATE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can delete stock_movements" ON stock_movements FOR DELETE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+
+-- RLS Policies for suppliers
+CREATE POLICY "Users can read suppliers" ON suppliers FOR SELECT TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can insert suppliers" ON suppliers FOR INSERT TO public WITH CHECK (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can update suppliers" ON suppliers FOR UPDATE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can delete suppliers" ON suppliers FOR DELETE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+
+-- RLS Policies for product_suppliers
+CREATE POLICY "Users can read product_suppliers" ON product_suppliers FOR SELECT TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can insert product_suppliers" ON product_suppliers FOR INSERT TO public WITH CHECK (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can update product_suppliers" ON product_suppliers FOR UPDATE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
+CREATE POLICY "Users can delete product_suppliers" ON product_suppliers FOR DELETE TO public USING (has_role('user') OR has_role('manager') OR has_role('admin'));
 
 -- Sample Data
 INSERT INTO categories (name, description, icon) VALUES

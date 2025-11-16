@@ -11,15 +11,3 @@ export async function getSuppliers() {
   if (error) return { data: null, error }
   return { data: data as Supplier[], error: null }
 }
-
-export async function getSupplierById(id: string) {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('suppliers')
-    .select('*')
-    .eq('id', id)
-    .single()
-  
-  if (error) return { data: null, error }
-  return { data: data as Supplier, error: null }
-}

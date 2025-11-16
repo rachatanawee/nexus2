@@ -1,8 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
-import { isAdmin } from '@/lib/permissions'
 
 type FormState = {
   success: boolean
@@ -13,50 +11,83 @@ export async function createSupplier(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user || !isAdmin(user)) {
-    return { success: false, message: 'Access Denied' }
-  }
+  try {
+    const supabase = await createClient()
 
   const name = formData.get('name') as string
   if (!name) return { success: false, message: 'Name is required' }
   const code = formData.get('code') as string
   if (!code) return { success: false, message: 'Code is required' }
   const contact_person = formData.get('contact_person') as string
-  if (false) return { success: false, message: 'Contact_person is required' }
   const email = formData.get('email') as string
-  if (false) return { success: false, message: 'Email is required' }
   const phone = formData.get('phone') as string
-  if (false) return { success: false, message: 'Phone is required' }
   const address = formData.get('address') as string
-  if (false) return { success: false, message: 'Address is required' }
   const city = formData.get('city') as string
-  if (false) return { success: false, message: 'City is required' }
   const country = formData.get('country') as string
-  if (false) return { success: false, message: 'Country is required' }
   const payment_terms = formData.get('payment_terms') as string
-  if (false) return { success: false, message: 'Payment_terms is required' }
   const is_active = formData.get('is_active') as string
-  if (false) return { success: false, message: 'Is_active is required' }
 
-  const { error } = await supabase.from('suppliers').insert({
-    name,
-    code,
-    contact_person,
-    email,
-    phone,
-    address,
-    city,
-    country,
-    payment_terms,
-    is_active
-  })
-  if (error) return { success: false, message: error.message }
+    const { error } = await supabase.from('suppliers').insert({
+    name: name,
+    code: code,
+    contact_person: contact_person || null,
+    email: email || null,
+    phone: phone || null,
+    address: address || null,
+    city: city || null,
+    country: country || null,
+    payment_terms: payment_terms || null,
+    is_active: is_active || null
+    })
+    
+    if (error) return { success: false, message: error.message }
+    return { success: true, message: 'Supplier created successfully' }
+  } catch (err) {
+    return { success: false, message: 'Unexpected error occurred' }
+  }
+}
 
-  revalidatePath('/inventory/suppliers')
-  return { success: true, message: 'Supplier created successfully' }
+export async function updateSupplier(
+  prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  try {
+    const supabase = await createClient()
+
+    const id = formData.get('id') as string
+    if (!id) return { success: false, message: 'ID is required' }
+
+  const name = formData.get('name') as string
+  if (!name) return { success: false, message: 'Name is required' }
+  const code = formData.get('code') as string
+  if (!code) return { success: false, message: 'Code is required' }
+  const contact_person = formData.get('contact_person') as string
+  const email = formData.get('email') as string
+  const phone = formData.get('phone') as string
+  const address = formData.get('address') as string
+  const city = formData.get('city') as string
+  const country = formData.get('country') as string
+  const payment_terms = formData.get('payment_terms') as string
+  const is_active = formData.get('is_active') as string
+
+    const { error } = await supabase.from('suppliers').update({
+    name: name,
+    code: code,
+    contact_person: contact_person || null,
+    email: email || null,
+    phone: phone || null,
+    address: address || null,
+    city: city || null,
+    country: country || null,
+    payment_terms: payment_terms || null,
+    is_active: is_active || null
+    }).eq('id', id)
+    
+    if (error) return { success: false, message: error.message }
+    return { success: true, message: 'Supplier updated successfully' }
+  } catch (err) {
+    return { success: false, message: 'Unexpected error occurred' }
+  }
 }
 
 export async function deleteSupplier(
@@ -64,11 +95,6 @@ export async function deleteSupplier(
   formData: FormData
 ): Promise<FormState> {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user || !isAdmin(user)) {
-    return { success: false, message: 'Access Denied' }
-  }
 
   const id = formData.get('id') as string
   if (!id) return { success: false, message: 'ID is required' }
@@ -76,6 +102,5 @@ export async function deleteSupplier(
   const { error } = await supabase.from('suppliers').delete().eq('id', id)
   if (error) return { success: false, message: error.message }
 
-  revalidatePath('/inventory/suppliers')
   return { success: true, message: 'Supplier deleted successfully' }
 }
