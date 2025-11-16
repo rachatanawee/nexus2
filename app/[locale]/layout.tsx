@@ -38,7 +38,6 @@ export default async function LocaleLayout({
         <title>{settings.app_title || 'Nexus Admin'}</title>
         <meta name="description" content={settings.app_description || 'Admin Dashboard'} />
         {settings.favicon_url && <link rel="icon" href={settings.favicon_url} />}
-        {settings.theme_name && <link rel="stylesheet" href={`/themes/${settings.theme_name}.css`} />}
 
       </head>
       <body>
