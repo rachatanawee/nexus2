@@ -19,6 +19,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true)
       const newSettings = await getSystemFormatSettings()
+      console.log('Loaded settings:', newSettings) // Debug
       setSettings(newSettings)
     } catch (error) {
       console.error('Failed to load preferences:', error)

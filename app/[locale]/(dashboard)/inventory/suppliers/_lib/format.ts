@@ -1,15 +1,10 @@
 'use client'
 
-import { getSystemFormatSettings, formatSystemDate, formatSystemNumber } from '@/lib/format-utils'
-import { useEffect, useState } from 'react'
+import { formatSystemDate, formatSystemNumber } from '@/lib/format-utils'
+import { usePreferences } from '@/lib/preferences-context'
 
 export function useFormatSettings() {
-  const [settings, setSettings] = useState<any>({})
-  
-  useEffect(() => {
-    getSystemFormatSettings().then(setSettings)
-  }, [])
-  
+  const { settings } = usePreferences()
   return settings
 }
 

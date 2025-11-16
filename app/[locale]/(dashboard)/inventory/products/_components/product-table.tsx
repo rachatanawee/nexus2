@@ -20,6 +20,8 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
   const formatSettings = useFormatSettings()
 
+  console.log('Format Settings:', formatSettings) // Debug
+
   const getColumns = () => [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
     { accessorKey: 'sku', header: 'Sku', enableSorting: true },
@@ -55,7 +57,10 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => formatDate(new Date(row.original.created_at), formatSettings)
+      cell: ({ row }: any) => {
+        console.log('Date format:', formatSettings?.date_format) // Debug
+        return formatDate(new Date(row.original.created_at), formatSettings)
+      }
     },
     {
       id: 'actions',

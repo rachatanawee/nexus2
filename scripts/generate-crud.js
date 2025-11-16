@@ -162,12 +162,11 @@ export async function get${Feature}ById(id: string) {
 }
 `)
 
-// actions.ts
+// actions.ts - เอา admin check ออก
 fs.writeFileSync(`${basePath}/_lib/actions.ts`, `'use server'
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { isAdmin } from '@/lib/permissions'
 
 type FormState = {
   success: boolean
@@ -179,11 +178,6 @@ export async function create${Feature}(
   formData: FormData
 ): Promise<FormState> {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user || !isAdmin(user)) {
-    return { success: false, message: 'Access Denied' }
-  }
 
 ${fields.map(f => `  const ${f.name} = formData.get('${f.name}') as string
   if (${f.required ? `!${f.name}` : 'false'}) return { success: false, message: '${capitalize(f.name)} is required' }`).join('\n')}
@@ -202,11 +196,6 @@ export async function delete${Feature}(
   formData: FormData
 ): Promise<FormState> {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user || !isAdmin(user)) {
-    return { success: false, message: 'Access Denied' }
-  }
 
   const id = formData.get('id') as string
   if (!id) return { success: false, message: 'ID is required' }
@@ -219,19 +208,14 @@ export async function delete${Feature}(
 }
 `)
 
-// format utilities
+// format utilities - ใช้ preferences context
 fs.writeFileSync(`${basePath}/_lib/format.ts`, `'use client'
 
-import { getSystemFormatSettings, formatSystemDate, formatSystemNumber } from '@/lib/format-utils'
-import { useEffect, useState } from 'react'
+import { formatSystemDate, formatSystemNumber } from '@/lib/format-utils'
+import { usePreferences } from '@/lib/preferences-context'
 
 export function useFormatSettings() {
-  const [settings, setSettings] = useState<any>({})
-  
-  useEffect(() => {
-    getSystemFormatSettings().then(setSettings)
-  }, [])
-  
+  const { settings } = usePreferences()
   return settings
 }
 
@@ -240,7 +224,8 @@ export function formatNumber(value: number, settings?: any) {
 }
 
 export function formatDate(date: Date, settings?: any) {
-  return formatSystemDate(date, settings?.date_format)
+  const dateFormat = settings?.date_format || 'dd/MM/yyyy'
+  return formatSystemDate(date, dateFormat)
 }
 `)
 
@@ -294,7 +279,7 @@ ${fields.map(f => {
         const [deleting, setDeleting] = useState(false)
 
         const handleDelete = async () => {
-          if (!confirm(\`Delete \${row.original.name}?\`)) return
+          if (!confirm(\`Delete \${row.original.${fields[0]?.name || 'name'}}?\`)) return
           setDeleting(true)
           const formData = new FormData()
           formData.append('id', row.original.id)
@@ -323,7 +308,7 @@ ${fields.map(f => {
 
     if (params.search) {
       filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(params.search.toLowerCase())
+        item.${fields[0]?.name || 'name'}.toLowerCase().includes(params.search.toLowerCase())
       )
     }
 
@@ -356,7 +341,7 @@ ${fields.map(f => {
 ${fields.map(f => `            ${f.name}: '${capitalize(f.name)}'`).join(',\n')}
           },
           columnWidths: [
-${fields.map(() => `            { wch: 20 }`).join(',\n')}
+${fields.map(() => '            { wch: 20 }').join(',\n')}
           ],
           headers: [${fields.map(f => `'${capitalize(f.name)}'`).join(', ')}]
         }}
@@ -385,8 +370,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { create${Feature} } from '../_lib/actions'
-import { useActionState, useEffect } from 'react'
+import { useActionState } from 'react'
 import { toast } from 'sonner'
+import { useEffect } from 'react'
 
 interface Create${Feature}DialogProps {
   open: boolean
@@ -394,10 +380,7 @@ interface Create${Feature}DialogProps {
 }
 
 export function Create${Feature}Dialog({ open, onOpenChange }: Create${Feature}DialogProps) {
-  const [state, formAction, isPending] = useActionState(create${Feature}, {
-    success: false,
-    message: ''
-  })
+  const [state, formAction] = useActionState(create${Feature}, { success: false, message: '' })
 
   useEffect(() => {
     if (state.success) {
@@ -407,7 +390,7 @@ export function Create${Feature}Dialog({ open, onOpenChange }: Create${Feature}D
     } else if (state.message) {
       toast.error(state.message)
     }
-  }, [state])
+  }, [state, onOpenChange])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -417,12 +400,20 @@ export function Create${Feature}Dialog({ open, onOpenChange }: Create${Feature}D
         </DialogHeader>
         <form action={formAction} className="space-y-4">
 ${fields.map(f => `          <div>
-            <Label htmlFor="${f.name}">${capitalize(f.name)}</Label>
-            <Input id="${f.name}" name="${f.name}" ${f.required ? 'required' : ''} />
+            <Label htmlFor="${f.name}">${capitalize(f.name)}${f.required ? ' *' : ''}</Label>
+            <Input
+              id="${f.name}"
+              name="${f.name}"
+              type="${f.type.includes('int') || f.type.includes('numeric') ? 'number' : 'text'}"
+              required={${f.required}}
+            />
           </div>`).join('\n')}
-          <Button type="submit" disabled={isPending}>
-            {isPending ? 'Creating...' : 'Create'}
-          </Button>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">Create</Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
@@ -430,21 +421,11 @@ ${fields.map(f => `          <div>
 }
 `)
 
-// page.tsx
+// page.tsx - เอา admin check ออก
 fs.writeFileSync(`${basePath}/page.tsx`, `import { ${Feature}Table } from './_components/${singular}-table'
 import { get${Feature}s } from './_lib/queries'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { isAdmin } from '@/lib/permissions'
 
 export default async function ${Feature}sPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user || !isAdmin(user)) {
-    redirect('/dashboard')
-  }
-
   const { data: items } = await get${Feature}s()
 
   return (
@@ -456,12 +437,13 @@ export default async function ${Feature}sPage() {
 }
 `)
 
-console.log(`\n✅ Generated CRUD for ${featurePath}`)
-console.log(`📁 Path: ${basePath}`)
-console.log(`📋 Fields: ${fields.map(f => f.name).join(', ')}`)
+console.log(`✅ Generated CRUD for ${Feature}`)
+console.log(`📁 Files created in: ${basePath}`)
+console.log(`🔗 Route: /${routePath}`)
 console.log(`\n📝 Next steps:`)
-console.log(`1. Add route to sidebar (components/sidebar.tsx)`)
-console.log(`2. Add translations (messages/en.json, messages/th.json)`)
+console.log(`1. Add to sidebar: components/sidebar.tsx`)
+console.log(`2. Add translations: messages/en.json, messages/th.json`)
+console.log(`3. Customize generated files as needed`)
 }
 
 generate().catch(console.error)

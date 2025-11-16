@@ -1,15 +1,10 @@
 'use client'
 
-import { getSystemFormatSettings, formatSystemDate, formatSystemNumber } from '@/lib/format-utils'
-import { useEffect, useState } from 'react'
+import { formatSystemDate, formatSystemNumber } from '@/lib/format-utils'
+import { usePreferences } from '@/lib/preferences-context'
 
 export function useFormatSettings() {
-  const [settings, setSettings] = useState<any>({})
-  
-  useEffect(() => {
-    getSystemFormatSettings().then(setSettings)
-  }, [])
-  
+  const { settings } = usePreferences()
   return settings
 }
 
@@ -18,5 +13,7 @@ export function formatNumber(value: number, settings?: any) {
 }
 
 export function formatDate(date: Date, settings?: any) {
-  return formatSystemDate(date, settings?.date_format)
+  // Use fallback if date_format is not available
+  const dateFormat = settings?.date_format || 'MM/dd/yyyy'
+  return formatSystemDate(date, dateFormat)
 }
