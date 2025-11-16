@@ -1,6 +1,6 @@
 'use client'
 
-import { LayoutDashboard, Users, Settings, LogOut, ChevronLeft, ChevronRight, Languages, Package, ChevronDown } from 'lucide-react'
+import { LayoutDashboard, Users, Settings, LogOut, ChevronLeft, ChevronRight, Languages, Package, ChevronDown, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { logout } from '@/lib/actions/auth'
 import { Button } from './ui/button'
@@ -90,6 +90,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             </div>
           )}
         </div>
+        <Link href={`/${locale}/profile`} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/profile` ? 'bg-primary text-primary-foreground rounded-lg' : 'rounded-lg hover:bg-accent/50'} ${collapsed ? 'justify-center' : ''}`}>
+          <User className="h-5 w-5" />
+          {!collapsed && 'Profile'}
+        </Link>
         <Link href={`/${locale}/settings`} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/settings` ? 'bg-primary text-primary-foreground rounded-lg' : 'rounded-lg hover:bg-accent/50'} ${collapsed ? 'justify-center' : ''}`}>
           <Settings className="h-5 w-5" />
           {!collapsed && t('settings')}

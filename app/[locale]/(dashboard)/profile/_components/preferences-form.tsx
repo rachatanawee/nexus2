@@ -9,11 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { updatePreferences } from '../_lib/actions'
 import { useState, useActionState, useEffect, useTransition } from 'react'
 import { toast } from 'sonner'
-import { User, Bell, Shield, Palette, Save, RotateCcw } from 'lucide-react'
-import type { UserPreference } from '../_lib/types'
+import { Settings, Save, RotateCcw, User, Bell, Shield, Palette } from 'lucide-react'
 
 interface PreferencesFormProps {
-  preferences: UserPreference[]
+  preferences: any[]
 }
 
 const categoryIcons = {
@@ -70,13 +69,7 @@ export function PreferencesForm({ preferences }: PreferencesFormProps) {
     })
   }
 
-  const groupedPreferences = preferences.reduce((acc, pref) => {
-    if (!acc[pref.category]) acc[pref.category] = []
-    acc[pref.category].push(pref)
-    return acc
-  }, {} as Record<string, UserPreference[]>)
-
-  const renderInput = (preference: UserPreference) => {
+  const renderInput = (preference: any) => {
     const value = values[preference.key]
 
     switch (preference.type) {
@@ -121,27 +114,51 @@ export function PreferencesForm({ preferences }: PreferencesFormProps) {
             </Select>
           )
         }
+        if (preference.key === 'theme_mode') {
+          return (
+            <Select value={value} onValueChange={(v) => handleChange(preference.key, v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">Light</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+                <SelectItem value="system">System</SelectItem>
+              </SelectContent>
+            </Select>
+          )
+        }
+        if (preference.key === 'theme_name') {
+          return (
+            <Select value={value} onValueChange={(v) => handleChange(preference.key, v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tangerine">Tangerine</SelectItem>
+                <SelectItem value="claude">Claude</SelectItem>
+                <SelectItem value="clean-slate">Clean Slate</SelectItem>
+                <SelectItem value="ocean-breeze">Ocean Breeze</SelectItem>
+                <SelectItem value="twitter">Twitter</SelectItem>
+              </SelectContent>
+            </Select>
+          )
+        }
+        if (preference.key === 'profile_visibility') {
+          return (
+            <Select value={value} onValueChange={(v) => handleChange(preference.key, v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">Public</SelectItem>
+                <SelectItem value="private">Private</SelectItem>
+                <SelectItem value="friends">Friends Only</SelectItem>
+              </SelectContent>
+            </Select>
+          )
+        }
         return <Input value={value} onChange={(e) => handleChange(preference.key, e.target.value)} />
-
-      case 'number':
-        return (
-          <Input
-            type="number"
-            value={value}
-            onChange={(e) => handleChange(preference.key, e.target.value)}
-            step="any"
-            placeholder="0"
-          />
-        )
-
-      case 'email':
-        return (
-          <Input
-            type="email"
-            value={value}
-            onChange={(e) => handleChange(preference.key, e.target.value)}
-          />
-        )
 
       default:
         return (
@@ -153,13 +170,19 @@ export function PreferencesForm({ preferences }: PreferencesFormProps) {
     }
   }
 
+  const groupedPreferences = preferences.reduce((acc, pref) => {
+    if (!acc[pref.category]) acc[pref.category] = []
+    acc[pref.category].push(pref)
+    return acc
+  }, {} as Record<string, any[]>)
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {['profile', 'notifications', 'privacy', 'appearance'].map(category => {
         const categoryPreferences = groupedPreferences[category]
         if (!categoryPreferences) return null
         
-        const Icon = categoryIcons[category as keyof typeof categoryIcons] || User
+        const Icon = categoryIcons[category as keyof typeof categoryIcons] || Settings
         
         return (
           <Card key={category}>
@@ -177,7 +200,7 @@ export function PreferencesForm({ preferences }: PreferencesFormProps) {
                 <div key={preference.id} className="space-y-2">
                   <Label htmlFor={preference.key} className="flex items-center justify-between">
                     <span className="font-medium">
-                      {preference.key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                      {preference.key.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                     </span>
                     <code className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                       {preference.key}

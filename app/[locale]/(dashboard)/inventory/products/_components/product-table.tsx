@@ -9,7 +9,7 @@ import { CreateProductDialog } from './create-product-dialog'
 import { deleteProduct } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { formatNumber, formatDate } from '../_lib/format'
+import { formatNumber, formatDate, useFormatSettings } from '../_lib/format'
 
 interface ProductTableProps {
   data: Product[]
@@ -18,6 +18,7 @@ interface ProductTableProps {
 
 export function ProductTable({ data, totalItems }: ProductTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
+  const formatSettings = useFormatSettings()
 
   const getColumns = () => [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
@@ -28,25 +29,25 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
       accessorKey: 'price', 
       header: 'Price', 
       enableSorting: true,
-      cell: ({ row }: any) => formatNumber(row.original.price)
+      cell: ({ row }: any) => formatNumber(row.original.price, formatSettings)
     },
     { 
       accessorKey: 'cost', 
       header: 'Cost', 
       enableSorting: true,
-      cell: ({ row }: any) => formatNumber(row.original.cost)
+      cell: ({ row }: any) => formatNumber(row.original.cost, formatSettings)
     },
     { 
       accessorKey: 'stock_quantity', 
       header: 'Stock_quantity', 
       enableSorting: true,
-      cell: ({ row }: any) => formatNumber(row.original.stock_quantity)
+      cell: ({ row }: any) => formatNumber(row.original.stock_quantity, formatSettings)
     },
     { 
       accessorKey: 'min_stock_level', 
       header: 'Min_stock_level', 
       enableSorting: true,
-      cell: ({ row }: any) => formatNumber(row.original.min_stock_level)
+      cell: ({ row }: any) => formatNumber(row.original.min_stock_level, formatSettings)
     },
     { accessorKey: 'image_url', header: 'Image_url', enableSorting: true },
     { accessorKey: 'is_active', header: 'Is_active', enableSorting: true },
@@ -54,7 +55,7 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => formatDate(new Date(row.original.created_at))
+      cell: ({ row }: any) => formatDate(new Date(row.original.created_at), formatSettings)
     },
     {
       id: 'actions',

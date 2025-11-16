@@ -9,7 +9,7 @@ import { CreateCategorieDialog } from './create-categorie-dialog'
 import { deleteCategorie } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { formatNumber, formatDate } from '../_lib/format'
+import { formatNumber, formatDate, useFormatSettings } from '../_lib/format'
 
 interface CategorieTableProps {
   data: Categorie[]
@@ -18,6 +18,7 @@ interface CategorieTableProps {
 
 export function CategorieTable({ data, totalItems }: CategorieTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
+  const formatSettings = useFormatSettings()
 
   const getColumns = () => [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
@@ -27,7 +28,10 @@ export function CategorieTable({ data, totalItems }: CategorieTableProps) {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => formatDate(new Date(row.original.created_at))
+      cell: ({ row }: any) => {
+        const date = new Date(row.original.created_at)
+        return formatSettings?.date_format ? formatDate(date, formatSettings) : date.toLocaleDateString()
+      }
     },
     {
       id: 'actions',

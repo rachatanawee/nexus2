@@ -9,7 +9,7 @@ import { CreateWarehouseDialog } from './create-warehouse-dialog'
 import { deleteWarehouse } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { formatNumber, formatDate } from '../_lib/format'
+import { formatNumber, formatDate, useFormatSettings } from '../_lib/format'
 
 interface WarehouseTableProps {
   data: Warehouse[]
@@ -18,6 +18,7 @@ interface WarehouseTableProps {
 
 export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
+  const formatSettings = useFormatSettings()
 
   const getColumns = () => [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
@@ -32,7 +33,7 @@ export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => formatDate(new Date(row.original.created_at))
+      cell: ({ row }: any) => formatDate(new Date(row.original.created_at), formatSettings)
     },
     {
       id: 'actions',

@@ -9,7 +9,7 @@ import { CreateSupplierDialog } from './create-supplier-dialog'
 import { deleteSupplier } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { formatNumber, formatDate } from '../_lib/format'
+import { formatNumber, formatDate, useFormatSettings } from '../_lib/format'
 
 interface SupplierTableProps {
   data: Supplier[]
@@ -18,6 +18,7 @@ interface SupplierTableProps {
 
 export function SupplierTable({ data, totalItems }: SupplierTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
+  const formatSettings = useFormatSettings()
 
   const getColumns = () => [
     { accessorKey: 'name', header: 'Name', enableSorting: true },
@@ -34,7 +35,7 @@ export function SupplierTable({ data, totalItems }: SupplierTableProps) {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => formatDate(new Date(row.original.created_at))
+      cell: ({ row }: any) => formatDate(new Date(row.original.created_at), formatSettings)
     },
     {
       id: 'actions',
