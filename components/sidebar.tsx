@@ -6,8 +6,10 @@ import { logout } from '@/lib/actions/auth'
 import { Button } from './ui/button'
 import Link from 'next/link'
 import { useParams, usePathname, useRouter } from 'next/navigation'
-import { useTransition, useState } from 'react'
+import { useTransition, useState, useEffect } from 'react'
 import { useSettings } from '@/lib/settings-context'
+import { createClient } from '@/lib/supabase/client'
+import { isAdmin } from '@/lib/permissions'
 
 interface SidebarProps {
   collapsed: boolean
@@ -23,6 +25,16 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const locale = params.locale as string
   const [isPending, startTransition] = useTransition()
   const [inventoryOpen, setInventoryOpen] = useState(pathname.includes('/inventory'))
+  const [userIsAdmin, setUserIsAdmin] = useState(false)
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserIsAdmin(isAdmin(user))
+    }
+    checkAdmin()
+  }, [])
 
   const switchLocale = () => {
     const newLocale = locale === 'en' ? 'th' : 'en'
@@ -56,10 +68,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <LayoutDashboard className="h-5 w-5" />
           {!collapsed && t('overview')}
         </Link>
-        <Link href={`/${locale}/users`} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/users` ? 'bg-primary text-primary-foreground rounded-lg' : 'rounded-lg hover:bg-accent/50'} ${collapsed ? 'justify-center' : ''}`}>
-          <Users className="h-5 w-5" />
-          {!collapsed && t('users')}
-        </Link>
+        {userIsAdmin && (
+          <Link href={`/${locale}/users`} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/users` ? 'bg-primary text-primary-foreground rounded-lg' : 'rounded-lg hover:bg-accent/50'} ${collapsed ? 'justify-center' : ''}`}>
+            <Users className="h-5 w-5" />
+            {!collapsed && t('users')}
+          </Link>
+        )}
         <div>
           <button
             onClick={() => setInventoryOpen(!inventoryOpen)}
@@ -94,10 +108,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <User className="h-5 w-5" />
           {!collapsed && 'Profile'}
         </Link>
-        <Link href={`/${locale}/settings`} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/settings` ? 'bg-primary text-primary-foreground rounded-lg' : 'rounded-lg hover:bg-accent/50'} ${collapsed ? 'justify-center' : ''}`}>
-          <Settings className="h-5 w-5" />
-          {!collapsed && t('settings')}
-        </Link>
+        {userIsAdmin && (
+          <Link href={`/${locale}/settings`} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/settings` ? 'bg-primary text-primary-foreground rounded-lg' : 'rounded-lg hover:bg-accent/50'} ${collapsed ? 'justify-center' : ''}`}>
+            <Settings className="h-5 w-5" />
+            {!collapsed && t('settings')}
+          </Link>
+        )}
       </nav>
       <div className="border-t p-2 space-y-1">
         {!collapsed && (

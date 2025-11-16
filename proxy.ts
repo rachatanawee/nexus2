@@ -1,6 +1,7 @@
 import createMiddleware from 'next-intl/middleware'
 import { NextRequest, NextResponse } from 'next/server'
 import { updateSession } from './lib/supabase/middleware'
+import { isAdmin } from './lib/permissions'
 
 const intlMiddleware = createMiddleware({
   locales: ['en', 'th'],
@@ -18,6 +19,8 @@ export default async function proxy(request: NextRequest) {
   
   const isAuthPage = pathname.includes('/login')
   const isDashboard = pathname.includes('/dashboard')
+  const isUsersPage = pathname.includes('/users')
+  const isSettingsPage = pathname.includes('/settings')
 
   if (!user && isDashboard) {
     const locale = pathname.split('/')[1] || 'en'
@@ -25,6 +28,11 @@ export default async function proxy(request: NextRequest) {
   }
 
   if (user && isAuthPage) {
+    const locale = pathname.split('/')[1] || 'en'
+    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url))
+  }
+
+  if ((isUsersPage || isSettingsPage) && (!user || !isAdmin(user))) {
     const locale = pathname.split('/')[1] || 'en'
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url))
   }

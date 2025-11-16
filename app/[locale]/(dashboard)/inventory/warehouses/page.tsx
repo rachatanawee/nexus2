@@ -1,17 +1,7 @@
 import { WarehouseTable } from './_components/warehouse-table'
 import { getWarehouses } from './_lib/queries'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { isAdmin } from '@/lib/permissions'
 
 export default async function WarehousesPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user || !isAdmin(user)) {
-    redirect('/dashboard')
-  }
-
   const { data: items } = await getWarehouses()
 
   return (
