@@ -58,7 +58,8 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const formData = new FormData()
+    const form = e.target as HTMLFormElement
+    const formData = new FormData(form)
     formData.append('updates', JSON.stringify(values))
     formAction(formData)
   }

@@ -7,6 +7,7 @@ import { Button } from './ui/button'
 import Link from 'next/link'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import { useTransition, useState } from 'react'
+import { useSettings } from '@/lib/settings-context'
 
 interface SidebarProps {
   collapsed: boolean
@@ -35,10 +36,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     })
   }
 
+  const settings = useSettings()
+
   return (
     <div className={`flex h-screen flex-col border-r bg-white transition-all duration-300 ease-in-out ${collapsed ? 'w-16' : 'w-64'}`}>
       <div className="flex items-center justify-between border-b p-4">
-        {!collapsed && <h2 className="text-xl font-bold">{t('title')}</h2>}
+        {!collapsed && (
+          <div className="flex items-center gap-2">
+            {settings.logo_url && <img src={settings.logo_url} alt="Logo" className="h-6 w-6" />}
+            <h2 className="text-xl font-bold">{settings.app_title || t('title')}</h2>
+          </div>
+        )}
         <Button variant="ghost" size="icon" onClick={onToggle} className={collapsed ? 'mx-auto' : ''}>
           {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </Button>

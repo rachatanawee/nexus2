@@ -2,9 +2,17 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { Toaster } from '@/components/toaster'
+import { SettingsProvider } from '@/lib/settings-context'
+import { createClient } from '@/lib/supabase/server'
 import '../globals.css'
 
 const locales = ['en', 'th']
+
+async function getAppSettings() {
+  const supabase = await createClient()
+  const { data } = await supabase.from('app_settings').select('key, value')
+  return data?.reduce((acc, { key, value }) => ({ ...acc, [key]: value || '' }), {}) || {}
+}
 
 export default async function LocaleLayout({
   children,
@@ -20,14 +28,27 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages({ locale })
+  const settings = await getAppSettings()
 
   return (
     <html lang={locale}>
+      <head>
+        <title>{settings.app_title || 'Nexus Admin'}</title>
+        <meta name="description" content={settings.app_description || 'Admin Dashboard'} />
+        {settings.favicon_url && <link rel="icon" href={settings.favicon_url} />}
+        <style dangerouslySetInnerHTML={{ __html: `
+          :root {
+            --color-primary: ${settings.theme_primary_color || '#3b82f6'};
+          }
+        ` }} />
+      </head>
       <body>
-        <NextIntlClientProvider messages={messages}>
-          {children}
-          <Toaster />
-        </NextIntlClientProvider>
+        <SettingsProvider settings={settings}>
+          <NextIntlClientProvider messages={messages}>
+            {children}
+            <Toaster />
+          </NextIntlClientProvider>
+        </SettingsProvider>
       </body>
     </html>
   )
