@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { updateSettings } from '../_lib/actions'
-import { useState, useActionState, useEffect } from 'react'
+import { useState, useActionState, useEffect, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Settings, Palette, Sliders, Save, RotateCcw } from 'lucide-react'
 import type { AppSetting } from '../_lib/types'
@@ -32,10 +32,11 @@ export function SettingsForm({ settings }: SettingsFormProps) {
   const [values, setValues] = useState<Record<string, string>>(initialValues)
   const [hasChanges, setHasChanges] = useState(false)
 
-  const [state, formAction, isPending] = useActionState(updateSettings, {
+  const [state, formAction] = useActionState(updateSettings, {
     success: false,
     message: ''
   })
+  const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
     if (state.success) {
@@ -61,7 +62,9 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     const form = e.target as HTMLFormElement
     const formData = new FormData(form)
     formData.append('updates', JSON.stringify(values))
-    formAction(formData)
+    startTransition(() => {
+      formAction(formData)
+    })
   }
 
   const groupedSettings = settings.reduce((acc, setting) => {
@@ -108,6 +111,22 @@ export function SettingsForm({ settings }: SettingsFormProps) {
             </Select>
           )
         }
+        if (setting.key === 'theme_name') {
+          return (
+            <Select value={value} onValueChange={(v) => handleChange(setting.key, v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tangerine">Tangerine</SelectItem>
+                <SelectItem value="claude">Claude</SelectItem>
+                <SelectItem value="clean-slate">Clean Slate</SelectItem>
+                <SelectItem value="ocean-breeze">Ocean Breeze</SelectItem>
+                <SelectItem value="twitter">Twitter</SelectItem>
+              </SelectContent>
+            </Select>
+          )
+        }
         return <Input value={value} onChange={(e) => handleChange(setting.key, e.target.value)} />
 
       case 'number':
@@ -150,7 +169,10 @@ export function SettingsForm({ settings }: SettingsFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {Object.entries(groupedSettings).map(([category, categorySettings]) => {
+      {['general', 'preferences', 'appearance'].map(category => {
+        const categorySettings = groupedSettings[category]
+        if (!categorySettings) return null
+        
         const Icon = categoryIcons[category as keyof typeof categoryIcons] || Settings
         
         return (
@@ -165,6 +187,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+
               {categorySettings.map(setting => (
                 <div key={setting.id} className="space-y-2">
                   <Label htmlFor={setting.key} className="flex items-center justify-between">
@@ -186,7 +209,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
         )
       })}
 
-      <div className="flex gap-2 sticky bottom-4 bg-white p-4 rounded-lg border shadow-lg">
+      <div className="flex gap-2 sticky bottom-4 bg-card p-4 rounded-lg border shadow-lg">
         <Button type="submit" disabled={!hasChanges || isPending} className="flex-1">
           <Save className="h-4 w-4 mr-2" />
           {isPending ? 'Saving...' : 'Save Changes'}

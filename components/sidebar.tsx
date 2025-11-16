@@ -39,7 +39,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const settings = useSettings()
 
   return (
-    <div className={`fixed left-0 top-0 flex h-screen flex-col border-r bg-white transition-all duration-300 ease-in-out z-50 ${collapsed ? 'w-16' : 'w-64'}`}>
+    <div className={`fixed left-0 top-0 flex h-screen flex-col border-r transition-all duration-300 ease-in-out z-50 ${collapsed ? 'w-16' : 'w-64'}`} style={{ backgroundColor: 'var(--sidebar)' }}>
       <div className="flex items-center justify-between border-b p-4">
         {!collapsed && (
           <div className="flex items-center gap-2">
@@ -52,18 +52,18 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </Button>
       </div>
       <nav className="flex-1 space-y-1 p-2 overflow-y-auto">
-        <Link href={`/${locale}/dashboard`} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/dashboard` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'} ${collapsed ? 'justify-center' : ''}`}>
+        <Link href={`/${locale}/dashboard`} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/dashboard` ? 'bg-[hsl(var(--color-accent))] border-l-4 border-[hsl(var(--color-primary))]' : 'hover:bg-[hsl(var(--color-accent))] border-l-4 border-transparent'} ${collapsed ? 'justify-center' : ''}`}>
           <LayoutDashboard className="h-5 w-5" />
           {!collapsed && t('overview')}
         </Link>
-        <Link href={`/${locale}/users`} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/users` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'} ${collapsed ? 'justify-center' : ''}`}>
+        <Link href={`/${locale}/users`} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/users` ? 'bg-[hsl(var(--color-accent))] border-l-4 border-[hsl(var(--color-primary))]' : 'hover:bg-[hsl(var(--color-accent))] border-l-4 border-transparent'} ${collapsed ? 'justify-center' : ''}`}>
           <Users className="h-5 w-5" />
           {!collapsed && t('users')}
         </Link>
         <div>
           <button
             onClick={() => setInventoryOpen(!inventoryOpen)}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname.includes(`/${locale}/inventory`) ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'} ${collapsed ? 'justify-center' : ''}`}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname.includes(`/${locale}/inventory`) ? 'bg-[hsl(var(--color-accent))] border-l-4 border-[hsl(var(--color-primary))]' : 'hover:bg-[hsl(var(--color-accent))] border-l-4 border-transparent'} ${collapsed ? 'justify-center' : ''}`}
           >
             <Package className="h-5 w-5" />
             {!collapsed && (
@@ -75,27 +75,32 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </button>
           {!collapsed && inventoryOpen && (
             <div className="ml-8 mt-1 space-y-1 animate-in slide-in-from-top-2 duration-200">
-              <Link href={`/${locale}/inventory/categories`} className={`block rounded-lg px-3 py-2 text-sm transition-all duration-200 ${pathname === `/${locale}/inventory/categories` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'}`}>
+              <Link href={`/${locale}/inventory/categories`} className={`block rounded-lg px-3 py-2 text-sm transition-all duration-200 border-l-4 ${pathname === `/${locale}/inventory/categories` ? 'bg-[hsl(var(--color-accent))] border-[hsl(var(--color-primary))]' : 'hover:bg-[hsl(var(--color-accent))] border-transparent'}`}>
                 Categories
               </Link>
-              <Link href={`/${locale}/inventory/products`} className={`block rounded-lg px-3 py-2 text-sm transition-all duration-200 ${pathname === `/${locale}/inventory/products` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'}`}>
+              <Link href={`/${locale}/inventory/products`} className={`block rounded-lg px-3 py-2 text-sm transition-all duration-200 border-l-4 ${pathname === `/${locale}/inventory/products` ? 'bg-[hsl(var(--color-accent))] border-[hsl(var(--color-primary))]' : 'hover:bg-[hsl(var(--color-accent))] border-transparent'}`}>
                 Products
               </Link>
-              <Link href={`/${locale}/inventory/warehouses`} className={`block rounded-lg px-3 py-2 text-sm transition-all duration-200 ${pathname === `/${locale}/inventory/warehouses` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'}`}>
+              <Link href={`/${locale}/inventory/warehouses`} className={`block rounded-lg px-3 py-2 text-sm transition-all duration-200 border-l-4 ${pathname === `/${locale}/inventory/warehouses` ? 'bg-[hsl(var(--color-accent))] border-[hsl(var(--color-primary))]' : 'hover:bg-[hsl(var(--color-accent))] border-transparent'}`}>
                 Warehouses
               </Link>
-              <Link href={`/${locale}/inventory/suppliers`} className={`block rounded-lg px-3 py-2 text-sm transition-all duration-200 ${pathname === `/${locale}/inventory/suppliers` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'}`}>
+              <Link href={`/${locale}/inventory/suppliers`} className={`block rounded-lg px-3 py-2 text-sm transition-all duration-200 border-l-4 ${pathname === `/${locale}/inventory/suppliers` ? 'bg-[hsl(var(--color-accent))] border-[hsl(var(--color-primary))]' : 'hover:bg-[hsl(var(--color-accent))] border-transparent'}`}>
                 Suppliers
               </Link>
             </div>
           )}
         </div>
-        <Link href={`/${locale}/settings`} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/settings` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'} ${collapsed ? 'justify-center' : ''}`}>
+        <Link href={`/${locale}/settings`} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/settings` ? 'bg-[hsl(var(--color-accent))] border-l-4 border-[hsl(var(--color-primary))]' : 'hover:bg-[hsl(var(--color-accent))] border-l-4 border-transparent'} ${collapsed ? 'justify-center' : ''}`}>
           <Settings className="h-5 w-5" />
           {!collapsed && t('settings')}
         </Link>
       </nav>
       <div className="border-t p-2 space-y-1">
+        {!collapsed && (
+          <div className="px-3 py-2 text-sm text-muted-foreground truncate">
+            {settings.user_email || 'user@example.com'}
+          </div>
+        )}
         <Button variant="ghost" size="sm" className={`w-full ${collapsed ? 'justify-center px-0' : 'justify-start'}`} onClick={switchLocale}>
           <Languages className={`h-4 w-4 ${collapsed ? '' : 'mr-2'}`} />
           {!collapsed && (locale === 'en' ? 'ไทย' : 'EN')}

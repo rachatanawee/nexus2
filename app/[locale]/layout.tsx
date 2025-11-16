@@ -11,7 +11,9 @@ const locales = ['en', 'th']
 async function getAppSettings() {
   const supabase = await createClient()
   const { data } = await supabase.from('app_settings').select('key, value')
-  return data?.reduce((acc, { key, value }) => ({ ...acc, [key]: value || '' }), {}) || {}
+  const { data: { user } } = await supabase.auth.getUser()
+  const settings = data?.reduce((acc, { key, value }) => ({ ...acc, [key]: value || '' }), {}) || {}
+  return { ...settings, user_email: user?.email || '' }
 }
 
 export default async function LocaleLayout({
@@ -36,11 +38,8 @@ export default async function LocaleLayout({
         <title>{settings.app_title || 'Nexus Admin'}</title>
         <meta name="description" content={settings.app_description || 'Admin Dashboard'} />
         {settings.favicon_url && <link rel="icon" href={settings.favicon_url} />}
-        <style dangerouslySetInnerHTML={{ __html: `
-          :root {
-            --color-primary: ${settings.theme_primary_color || '#3b82f6'};
-          }
-        ` }} />
+        {settings.theme_name && <link rel="stylesheet" href={`/themes/${settings.theme_name}.css`} />}
+
       </head>
       <body>
         <SettingsProvider settings={settings}>

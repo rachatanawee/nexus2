@@ -14,6 +14,8 @@ type Settings = {
   items_per_page: string
   date_format: string
   timezone: string
+  user_email: string
+  theme_name: string
 }
 
 const SettingsContext = createContext<Settings | null>(null)
