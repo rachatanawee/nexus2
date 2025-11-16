@@ -95,7 +95,7 @@ export function SupplierFormDialog({ open, onOpenChange, supplier }: SupplierFor
             </div>
             <div>
               <Label htmlFor="is_active">Is_active</Label>
-              <Input id="is_active" name="is_active" type="text" defaultValue={supplier?.is_active || ''}  />
+              <Input id="is_active" name="is_active" type="text" defaultValue={supplier?.is_active ? 'true' : 'false'}  />
             </div>
           </div>
           <div className="flex justify-end gap-2">

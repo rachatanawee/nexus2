@@ -216,9 +216,12 @@ export function formatDate(date: Date, settings?: any) {
   const formFields = fields.map(f => {
     const inputType = f.tsType === 'number' ? 'number' : 'text'
     const step = f.type.includes('numeric') && !f.type.includes('int') ? ' step="0.01"' : ''
+    const defaultValue = f.tsType === 'boolean' 
+      ? `{${singular}?.${f.name} ? 'true' : 'false'}`
+      : `{${singular}?.${f.name}${!f.required ? " || ''" : ''}}`
     return `            <div>
               <Label htmlFor="${f.name}">${capitalize(f.name)}${f.required ? ' *' : ''}</Label>
-              <Input id="${f.name}" name="${f.name}" type="${inputType}"${step} defaultValue={${singular}?.${f.name}${!f.required ? ' || \'\'' : ''}} ${f.required ? 'required' : ''} />
+              <Input id="${f.name}" name="${f.name}" type="${inputType}"${step} defaultValue=${defaultValue} ${f.required ? 'required' : ''} />
             </div>`
   }).join('\n')
 
