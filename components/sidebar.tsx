@@ -39,7 +39,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const settings = useSettings()
 
   return (
-    <div className={`flex h-screen flex-col border-r bg-white transition-all duration-300 ease-in-out ${collapsed ? 'w-16' : 'w-64'}`}>
+    <div className={`fixed left-0 top-0 flex h-screen flex-col border-r bg-white transition-all duration-300 ease-in-out z-50 ${collapsed ? 'w-16' : 'w-64'}`}>
       <div className="flex items-center justify-between border-b p-4">
         {!collapsed && (
           <div className="flex items-center gap-2">
@@ -51,7 +51,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </Button>
       </div>
-      <nav className="flex-1 space-y-1 p-2">
+      <nav className="flex-1 space-y-1 p-2 overflow-y-auto">
         <Link href={`/${locale}/dashboard`} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/dashboard` ? 'bg-[hsl(var(--color-accent))]' : 'hover:bg-[hsl(var(--color-accent))]'} ${collapsed ? 'justify-center' : ''}`}>
           <LayoutDashboard className="h-5 w-5" />
           {!collapsed && t('overview')}
