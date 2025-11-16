@@ -1,7 +1,7 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
@@ -14,17 +14,20 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     const timer = setTimeout(() => {
       setDisplayChildren(children)
       setIsLoading(false)
-    }, 150)
+    }, 300)
     return () => clearTimeout(timer)
   }, [pathname])
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+  return (
+    <div className="relative min-h-screen">
+      {isLoading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+      <div className={`transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+        {displayChildren}
       </div>
-    )
-  }
-
-  return <div className="animate-in fade-in duration-200">{displayChildren}</div>
+    </div>
+  )
 }
