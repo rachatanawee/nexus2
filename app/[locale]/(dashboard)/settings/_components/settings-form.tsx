@@ -127,6 +127,61 @@ export function SettingsForm({ settings }: SettingsFormProps) {
             </Select>
           )
         }
+        if (setting.key === 'number_format_locale') {
+          return (
+            <Select value={value} onValueChange={(v) => handleChange(setting.key, v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en-US">English (US) - 1,234.56</SelectItem>
+                <SelectItem value="th-TH">Thai - 1,234.56</SelectItem>
+                <SelectItem value="de-DE">German - 1.234,56</SelectItem>
+              </SelectContent>
+            </Select>
+          )
+        }
+        if (setting.key === 'number_thousands_separator') {
+          return (
+            <Select value={value} onValueChange={(v) => handleChange(setting.key, v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">Yes - 1,234</SelectItem>
+                <SelectItem value="false">No - 1234</SelectItem>
+              </SelectContent>
+            </Select>
+          )
+        }
+        if (setting.key === 'currency_format') {
+          return (
+            <Select value={value} onValueChange={(v) => handleChange(setting.key, v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="USD">USD ($)</SelectItem>
+                <SelectItem value="THB">THB (฿)</SelectItem>
+                <SelectItem value="EUR">EUR (€)</SelectItem>
+              </SelectContent>
+            </Select>
+          )
+        }
+        if (setting.key === 'date_format') {
+          return (
+            <Select value={value} onValueChange={(v) => handleChange(setting.key, v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="MM/dd/yyyy">MM/dd/yyyy</SelectItem>
+                <SelectItem value="dd/MM/yyyy">dd/MM/yyyy</SelectItem>
+                <SelectItem value="yyyy-MM-dd">yyyy-MM-dd</SelectItem>
+              </SelectContent>
+            </Select>
+          )
+        }
         return <Input value={value} onChange={(e) => handleChange(setting.key, e.target.value)} />
 
       case 'number':
@@ -135,6 +190,8 @@ export function SettingsForm({ settings }: SettingsFormProps) {
             type="number"
             value={value}
             onChange={(e) => handleChange(setting.key, e.target.value)}
+            step="any"
+            placeholder="0"
           />
         )
 

@@ -4,11 +4,12 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/data-table/data-table'
 import { Supplier } from '../_lib/types'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CreateSupplierDialog } from './create-supplier-dialog'
 import { deleteSupplier } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatNumber, formatDate } from '../_lib/format'
 
 interface SupplierTableProps {
   data: Supplier[]
@@ -33,7 +34,7 @@ export function SupplierTable({ data, totalItems }: SupplierTableProps) {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => new Date(row.original.created_at).toLocaleDateString()
+      cell: ({ row }: any) => formatDate(new Date(row.original.created_at))
     },
     {
       id: 'actions',
@@ -71,7 +72,7 @@ export function SupplierTable({ data, totalItems }: SupplierTableProps) {
     let filtered = [...data]
 
     if (params.search) {
-      filtered = filtered.filter(item => 
+      filtered = filtered.filter(item =>
         item.name.toLowerCase().includes(params.search.toLowerCase())
       )
     }

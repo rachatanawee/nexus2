@@ -4,11 +4,12 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/data-table/data-table'
 import { Product } from '../_lib/types'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CreateProductDialog } from './create-product-dialog'
 import { deleteProduct } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatNumber, formatDate } from '../_lib/format'
 
 interface ProductTableProps {
   data: Product[]
@@ -23,17 +24,37 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
     { accessorKey: 'sku', header: 'Sku', enableSorting: true },
     { accessorKey: 'description', header: 'Description', enableSorting: true },
     { accessorKey: 'category_id', header: 'Category_id', enableSorting: true },
-    { accessorKey: 'price', header: 'Price', enableSorting: true },
-    { accessorKey: 'cost', header: 'Cost', enableSorting: true },
-    { accessorKey: 'stock_quantity', header: 'Stock_quantity', enableSorting: true },
-    { accessorKey: 'min_stock_level', header: 'Min_stock_level', enableSorting: true },
+    { 
+      accessorKey: 'price', 
+      header: 'Price', 
+      enableSorting: true,
+      cell: ({ row }: any) => formatNumber(row.original.price)
+    },
+    { 
+      accessorKey: 'cost', 
+      header: 'Cost', 
+      enableSorting: true,
+      cell: ({ row }: any) => formatNumber(row.original.cost)
+    },
+    { 
+      accessorKey: 'stock_quantity', 
+      header: 'Stock_quantity', 
+      enableSorting: true,
+      cell: ({ row }: any) => formatNumber(row.original.stock_quantity)
+    },
+    { 
+      accessorKey: 'min_stock_level', 
+      header: 'Min_stock_level', 
+      enableSorting: true,
+      cell: ({ row }: any) => formatNumber(row.original.min_stock_level)
+    },
     { accessorKey: 'image_url', header: 'Image_url', enableSorting: true },
     { accessorKey: 'is_active', header: 'Is_active', enableSorting: true },
     {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => new Date(row.original.created_at).toLocaleDateString()
+      cell: ({ row }: any) => formatDate(new Date(row.original.created_at))
     },
     {
       id: 'actions',
@@ -71,7 +92,7 @@ export function ProductTable({ data, totalItems }: ProductTableProps) {
     let filtered = [...data]
 
     if (params.search) {
-      filtered = filtered.filter(item => 
+      filtered = filtered.filter(item =>
         item.name.toLowerCase().includes(params.search.toLowerCase())
       )
     }

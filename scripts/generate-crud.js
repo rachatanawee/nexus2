@@ -37,12 +37,20 @@ async function getTableSchema(tableName) {
     })
 
     const openapi = await response.json()
-    const tableDef = openapi.definitions?.[tableName]
+    let tableDef = openapi.definitions?.[tableName]
 
+    // ถ้าไม่มีตาราง ลองใช้ user_preferences แทน
     if (!tableDef || !tableDef.properties) {
-      console.error('❌ Table not found in schema')
-      console.log('💡 Available tables:', Object.keys(openapi.definitions || {}).join(', '))
-      return []
+      console.log('⚠️  Table not found, checking for user_preferences...')
+      const userPrefDef = openapi.definitions?.['user_preferences']
+      
+      if (userPrefDef && userPrefDef.properties) {
+        console.log('✅ Using user_preferences schema')
+        return getUserPreferencesFields()
+      }
+      
+      console.log('⚠️  Using general settings schema')
+      return getGeneralSettingsFields()
     }
 
     const excludeFields = ['id', 'created_at', 'updated_at']
@@ -65,17 +73,38 @@ async function getTableSchema(tableName) {
     return fields
   } catch (error) {
     console.error('❌ Error fetching schema:', error.message)
-    return []
+    return getGeneralSettingsFields()
   }
+}
+
+function getUserPreferencesFields() {
+  return [
+    { name: 'user_id', type: 'uuid', required: true },
+    { name: 'key', type: 'text', required: true },
+    { name: 'value', type: 'text', required: false },
+    { name: 'category', type: 'text', required: true },
+    { name: 'type', type: 'text', required: true },
+    { name: 'description', type: 'text', required: false }
+  ]
+}
+
+function getGeneralSettingsFields() {
+  return [
+    { name: 'key', type: 'text', required: true },
+    { name: 'value', type: 'text', required: false },
+    { name: 'category', type: 'text', required: true },
+    { name: 'type', type: 'text', required: true },
+    { name: 'description', type: 'text', required: false }
+  ]
 }
 
 async function generate() {
   console.log('🔍 Fetching schema from Supabase...')
-  const fields = await getTableSchema(tableName)
+  let fields = await getTableSchema(tableName)
   
   if (fields.length === 0) {
     console.log('⚠️  No fields found, using default: name')
-    fields.push({ name: 'name', type: 'text', required: true })
+    fields = [{ name: 'name', type: 'text', required: true }]
   }
 
   console.log('📋 Fields:', fields.map(f => f.name).join(', '))
@@ -190,6 +219,30 @@ export async function delete${Feature}(
 }
 `)
 
+// format utilities
+fs.writeFileSync(`${basePath}/_lib/format.ts`, `'use client'
+
+export function formatNumber(value: number, locale = 'en-US', decimals = 2, useThousands = true) {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+    useGrouping: useThousands
+  }).format(value)
+}
+
+export function formatDate(date: Date, format = 'MM/dd/yyyy') {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  
+  switch (format) {
+    case 'dd/MM/yyyy': return \`\${day}/\${month}/\${year}\`
+    case 'yyyy-MM-dd': return \`\${year}-\${month}-\${day}\`
+    default: return \`\${month}/\${day}/\${year}\`
+  }
+}
+`)
+
 // table component
 fs.writeFileSync(`${basePath}/_components/${singular}-table.tsx`, `'use client'
 
@@ -197,11 +250,12 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/data-table/data-table'
 import { ${Feature} } from '../_lib/types'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Create${Feature}Dialog } from './create-${singular}-dialog'
 import { delete${Feature} } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatNumber, formatDate } from '../_lib/format'
 
 interface ${Feature}TableProps {
   data: ${Feature}[]
@@ -212,12 +266,23 @@ export function ${Feature}Table({ data, totalItems }: ${Feature}TableProps) {
   const [createOpen, setCreateOpen] = useState(false)
 
   const getColumns = () => [
-${fields.map(f => `    { accessorKey: '${f.name}', header: '${capitalize(f.name)}', enableSorting: true }`).join(',\n')},
+${fields.map(f => {
+  if (f.type.includes('int') || f.type.includes('numeric')) {
+    return `    { 
+      accessorKey: '${f.name}', 
+      header: '${capitalize(f.name)}', 
+      enableSorting: true,
+      cell: ({ row }: any) => formatNumber(row.original.${f.name})
+    }`
+  } else {
+    return `    { accessorKey: '${f.name}', header: '${capitalize(f.name)}', enableSorting: true }`
+  }
+}).join(',\n')},
     {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => new Date(row.original.created_at).toLocaleDateString()
+      cell: ({ row }: any) => formatDate(new Date(row.original.created_at))
     },
     {
       id: 'actions',
@@ -255,7 +320,7 @@ ${fields.map(f => `    { accessorKey: '${f.name}', header: '${capitalize(f.name)
     let filtered = [...data]
 
     if (params.search) {
-      filtered = filtered.filter(item => 
+      filtered = filtered.filter(item =>
         item.name.toLowerCase().includes(params.search.toLowerCase())
       )
     }

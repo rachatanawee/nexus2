@@ -4,11 +4,12 @@ import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/data-table/data-table'
 import { Warehouse } from '../_lib/types'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CreateWarehouseDialog } from './create-warehouse-dialog'
 import { deleteWarehouse } from '../_lib/actions'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatNumber, formatDate } from '../_lib/format'
 
 interface WarehouseTableProps {
   data: Warehouse[]
@@ -31,7 +32,7 @@ export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
       accessorKey: 'created_at',
       header: 'Created',
       enableSorting: true,
-      cell: ({ row }: any) => new Date(row.original.created_at).toLocaleDateString()
+      cell: ({ row }: any) => formatDate(new Date(row.original.created_at))
     },
     {
       id: 'actions',
@@ -69,7 +70,7 @@ export function WarehouseTable({ data, totalItems }: WarehouseTableProps) {
     let filtered = [...data]
 
     if (params.search) {
-      filtered = filtered.filter(item => 
+      filtered = filtered.filter(item =>
         item.name.toLowerCase().includes(params.search.toLowerCase())
       )
     }
