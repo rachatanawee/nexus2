@@ -7,27 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-17
+
 ### Added
-- System tables with `_` prefix for better organization
-- App settings and user preferences system
-- Format system with number and date formatting
-- Preferences caching with React Context
-- Profile management with user metadata
-- Enhanced CRUD generator with format integration
-- Comprehensive documentation
+- Page transition with loading state and fade-in animation
+- Error handling system with Supabase error details
+- Rate limiting utility for API routes
+- Docker deployment support (Dockerfile, docker-compose.yml)
+- Consolidated documentation (GUIDE.md)
+- Admin user protection (cannot delete last admin)
+- Boolean field handling in CRUD generator
+- Global error boundary and 404 page
 
 ### Changed
-- Updated table naming convention (system tables use `_` prefix)
-- Improved CRUD generator with fallback schemas
-- Enhanced format system with user preferences
-- Better error handling in build process
+- Converted scripts to ES modules
+- Improved CRUD generator with boolean type support
+- Consolidated docs from 10 files to 7 files
+- Enhanced user deletion with admin count validation
+- Removed duplicate page refresh on user creation
 
 ### Fixed
-- TypeScript build errors
-- Server/client component issues
-- Format preferences not updating in real-time
+- React hooks error from permission checks in page components
+- Boolean field type errors in generated forms
+- Double refresh issue on user create/delete
+- Supabase error messages now show details and hints
+- TypeScript 'any' type warnings in layout
 
-## [1.0.0] - 2024-12-25
+## [0.2.0] - 2024-12-25
 
 ### Added
 - Next.js 16 with App Router
