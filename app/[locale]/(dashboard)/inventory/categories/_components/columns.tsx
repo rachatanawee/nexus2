@@ -9,6 +9,8 @@ import { toast } from "sonner"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { CategorieFormDialog } from "./categorie-form-dialog"
+import { usePreferences } from "@/lib/preferences-context"
+import { formatSystemDate } from "@/lib/format-utils"
 
 export const columns: ColumnDef<Categorie>[] = [
   {
@@ -46,8 +48,10 @@ export const columns: ColumnDef<Categorie>[] = [
         </Button>
       )
     },
-    cell: ({ row }) => {
-      return new Date(row.original.created_at).toLocaleDateString()
+    cell: function DateCell({ row }) {
+      const { settings } = usePreferences()
+      const dateFormat = settings?.date_format || 'MM/dd/yyyy'
+      return formatSystemDate(new Date(row.original.created_at), dateFormat)
     },
   },
   {

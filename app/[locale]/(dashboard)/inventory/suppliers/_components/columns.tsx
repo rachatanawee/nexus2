@@ -9,6 +9,8 @@ import { toast } from "sonner"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { SupplierFormDialog } from "./supplier-form-dialog"
+import { usePreferences } from "@/lib/preferences-context"
+import { formatSystemDate } from "@/lib/format-utils"
 
 export const columns: ColumnDef<Supplier>[] = [
   {
@@ -36,7 +38,11 @@ export const columns: ColumnDef<Supplier>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => new Date(row.original.created_at).toLocaleDateString(),
+    cell: function DateCell({ row }) {
+      const { settings } = usePreferences()
+      const dateFormat = settings?.date_format || 'MM/dd/yyyy'
+      return formatSystemDate(new Date(row.original.created_at), dateFormat)
+    },
   },
   {
     id: "actions",

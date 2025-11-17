@@ -7,7 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-11-17
+## [0.4.0] - 2026-01-17
+
+### Added
+- Modern DataTable with TanStack Table v8
+- Column resizing with drag handles
+- Sticky table headers with scroll
+- Column visibility toggle
+- Export to Excel functionality
+- Advanced pagination (page size, first/last)
+- Row selection support
+- Faceted filters
+- Search with reset filters
+- Date formatting with preference cache
+- New CRUD generator (v3) using modern DataTable
+
+### Changed
+- Replaced complex DataTable with simple TanStack Table wrapper
+- Updated all tables (users, categories, products) to new DataTable
+- CRUD generator now uses columns pattern instead of getColumns
+- Simplified table components (no fetchData, exportConfig)
+
+### Removed
+- Old data-table directory with complex implementation
+- Old CRUD generator scripts (v1, v2)
+
+## [0.3.0] - 2025-01-17
 
 ### Added
 - Page transition with loading state and fade-in animation

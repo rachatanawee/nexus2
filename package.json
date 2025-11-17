@@ -1,6 +1,6 @@
 {
   "name": "nexus2",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Production-ready Next.js 16 boilerplate with Supabase authentication, RBAC, multi-language support, and admin dashboard using Feature-Colocation pattern",
   "keywords": [
     "nextjs",
