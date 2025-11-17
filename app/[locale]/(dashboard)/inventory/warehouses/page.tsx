@@ -7,7 +7,7 @@ export default async function WarehousesPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-primary">Warehouses</h1>
-      <WarehouseTable data={items || []} totalItems={items?.length || 0} />
+      <WarehouseTable data={items || []} />
     </div>
   )
 }

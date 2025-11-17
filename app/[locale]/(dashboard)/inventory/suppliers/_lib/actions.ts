@@ -7,13 +7,9 @@ type FormState = {
   message: string
 }
 
-export async function createSupplier(
-  prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
+export async function createSupplier(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
     const supabase = await createClient()
-
   const name = formData.get('name') as string
   if (!name) return { success: false, message: 'Name is required' }
   const code = formData.get('code') as string
@@ -39,7 +35,6 @@ export async function createSupplier(
     payment_terms: payment_terms || null,
     is_active: is_active || null
     })
-    
     if (error) return { success: false, message: error.message }
     return { success: true, message: 'Supplier created successfully' }
   } catch (err) {
@@ -47,16 +42,11 @@ export async function createSupplier(
   }
 }
 
-export async function updateSupplier(
-  prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
+export async function updateSupplier(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
     const supabase = await createClient()
-
     const id = formData.get('id') as string
     if (!id) return { success: false, message: 'ID is required' }
-
   const name = formData.get('name') as string
   if (!name) return { success: false, message: 'Name is required' }
   const code = formData.get('code') as string
@@ -82,7 +72,6 @@ export async function updateSupplier(
     payment_terms: payment_terms || null,
     is_active: is_active || null
     }).eq('id', id)
-    
     if (error) return { success: false, message: error.message }
     return { success: true, message: 'Supplier updated successfully' }
   } catch (err) {
@@ -90,17 +79,11 @@ export async function updateSupplier(
   }
 }
 
-export async function deleteSupplier(
-  prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
+export async function deleteSupplier(prevState: FormState, formData: FormData): Promise<FormState> {
   const supabase = await createClient()
-
   const id = formData.get('id') as string
   if (!id) return { success: false, message: 'ID is required' }
-
   const { error } = await supabase.from('suppliers').delete().eq('id', id)
   if (error) return { success: false, message: error.message }
-
   return { success: true, message: 'Supplier deleted successfully' }
 }

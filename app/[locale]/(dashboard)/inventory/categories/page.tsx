@@ -7,7 +7,7 @@ export default async function CategoriesPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-primary">Categories</h1>
-      <CategorieTable data={items || []} totalItems={items?.length || 0} />
+      <CategorieTable data={items || []} />
     </div>
   )
 }

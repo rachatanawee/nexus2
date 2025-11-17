@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createSupplier, updateSupplier } from '../_lib/actions'
-import { useActionState, useEffect, useRef, useState } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { Supplier } from '../_lib/types'
 import { useRouter } from 'next/navigation'
@@ -19,7 +19,6 @@ interface SupplierFormDialogProps {
 export function SupplierFormDialog({ open, onOpenChange, supplier }: SupplierFormDialogProps) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
-  const [formData, setFormData] = useState<Record<string, string>>({})
   const isEdit = !!supplier
   
   const [state, formAction, isPending] = useActionState(
@@ -27,20 +26,10 @@ export function SupplierFormDialog({ open, onOpenChange, supplier }: SupplierFor
     { success: false, message: '' }
   )
 
-  const handleSubmit = (formData: FormData) => {
-    const data: Record<string, string> = {}
-    for (const [key, value] of formData.entries()) {
-      data[key] = value.toString()
-    }
-    setFormData(data)
-    formAction(formData)
-  }
-
   useEffect(() => {
     if (state.success) {
       toast.success(state.message)
       onOpenChange(false)
-      setFormData({})
       formRef.current?.reset()
       router.refresh()
     } else if (state.message) {
@@ -54,7 +43,7 @@ export function SupplierFormDialog({ open, onOpenChange, supplier }: SupplierFor
         <DialogHeader>
           <DialogTitle>{isEdit ? 'Edit Supplier' : 'Create Supplier'}</DialogTitle>
         </DialogHeader>
-        <form ref={formRef} action={handleSubmit} className="space-y-4">
+        <form ref={formRef} action={formAction} className="space-y-4">
           {isEdit && <input type="hidden" name="id" value={supplier.id} />}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -99,9 +88,7 @@ export function SupplierFormDialog({ open, onOpenChange, supplier }: SupplierFor
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit" disabled={isPending}>
               {isPending ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Update' : 'Create')}
             </Button>

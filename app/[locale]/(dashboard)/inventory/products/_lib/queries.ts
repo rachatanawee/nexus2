@@ -11,15 +11,3 @@ export async function getProducts() {
   if (error) return { data: null, error }
   return { data: data as Product[], error: null }
 }
-
-export async function getProductById(id: string) {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('id', id)
-    .single()
-  
-  if (error) return { data: null, error }
-  return { data: data as Product, error: null }
-}

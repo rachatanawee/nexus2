@@ -7,13 +7,9 @@ type FormState = {
   message: string
 }
 
-export async function createWarehouse(
-  prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
+export async function createWarehouse(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
     const supabase = await createClient()
-
   const name = formData.get('name') as string
   if (!name) return { success: false, message: 'Name is required' }
   const code = formData.get('code') as string
@@ -35,7 +31,6 @@ export async function createWarehouse(
     phone: phone || null,
     is_active: is_active || null
     })
-    
     if (error) return { success: false, message: error.message }
     return { success: true, message: 'Warehouse created successfully' }
   } catch (err) {
@@ -43,16 +38,11 @@ export async function createWarehouse(
   }
 }
 
-export async function updateWarehouse(
-  prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
+export async function updateWarehouse(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
     const supabase = await createClient()
-
     const id = formData.get('id') as string
     if (!id) return { success: false, message: 'ID is required' }
-
   const name = formData.get('name') as string
   if (!name) return { success: false, message: 'Name is required' }
   const code = formData.get('code') as string
@@ -74,7 +64,6 @@ export async function updateWarehouse(
     phone: phone || null,
     is_active: is_active || null
     }).eq('id', id)
-    
     if (error) return { success: false, message: error.message }
     return { success: true, message: 'Warehouse updated successfully' }
   } catch (err) {
@@ -82,17 +71,11 @@ export async function updateWarehouse(
   }
 }
 
-export async function deleteWarehouse(
-  prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
+export async function deleteWarehouse(prevState: FormState, formData: FormData): Promise<FormState> {
   const supabase = await createClient()
-
   const id = formData.get('id') as string
   if (!id) return { success: false, message: 'ID is required' }
-
   const { error } = await supabase.from('warehouses').delete().eq('id', id)
   if (error) return { success: false, message: error.message }
-
   return { success: true, message: 'Warehouse deleted successfully' }
 }
