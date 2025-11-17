@@ -38,7 +38,8 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
     if (result.success) {
       toast.success(result.message)
       onOpenChange(false)
-      window.location.reload()
+      setSelectedRoles(['user'])
+      e.currentTarget.reset()
     } else {
       toast.error(result.message)
       setMessage(result.message)
