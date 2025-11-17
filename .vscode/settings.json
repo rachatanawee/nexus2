@@ -1,0 +1,12 @@
+{
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.suggest.autoImports": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "debug.javascript.autoAttachFilter": "onlyWithFlag",
+  "debug.node.autoAttach": "on",
+  "playwright.testIdAttribute": "data-testid",
+  "playwright.showTrace": true,
+  "testing.automaticallyOpenPeekView": "never"
+}

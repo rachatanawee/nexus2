@@ -10,7 +10,7 @@ export async function loginAsAdmin(page: Page) {
 
 export async function loginAsUser(page: Page) {
   await page.goto('/en/login')
-  await page.fill('#email', 'user@test.com')
+  await page.fill('#email', 'user1@test.com')
   await page.fill('#password', 'asdfasdf')
   await page.click('button[type="submit"]')
   await page.waitForURL('/en/dashboard')
