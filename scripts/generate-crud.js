@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
-const fs = require('fs')
-require('dotenv').config({ path: '.env.local' })
+import fs from 'fs'
+import dotenv from 'dotenv'
+
+dotenv.config({ path: '.env.local' })
 
 const [,, featurePath, tableName] = process.argv
 

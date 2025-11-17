@@ -71,6 +71,20 @@ export async function deleteUser(
     return { success: false, message: 'User ID required' }
   }
 
+  // Check if user is admin
+  const { data: targetUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+  const isTargetAdmin = targetUser?.user?.app_metadata?.roles?.includes('admin')
+
+  if (isTargetAdmin) {
+    // Count remaining admins
+    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers()
+    const adminCount = users.filter(u => u.app_metadata?.roles?.includes('admin')).length
+
+    if (adminCount <= 1) {
+      return { success: false, message: 'Cannot delete the last admin user' }
+    }
+  }
+
   const { error } = await supabaseAdmin.auth.admin.deleteUser(userId)
 
   if (error) {
@@ -103,6 +117,20 @@ export async function updateUserRole(
 
   if (!targetUserId || newRoles.length === 0) {
     return { success: false, message: 'User ID and roles required' }
+  }
+
+  // Check if removing admin role from last admin
+  const { data: targetUser } = await supabaseAdmin.auth.admin.getUserById(targetUserId)
+  const wasAdmin = targetUser?.user?.app_metadata?.roles?.includes('admin')
+  const willBeAdmin = newRoles.includes('admin')
+
+  if (wasAdmin && !willBeAdmin) {
+    const { data: { users } } = await supabaseAdmin.auth.admin.listUsers()
+    const adminCount = users.filter(u => u.app_metadata?.roles?.includes('admin')).length
+
+    if (adminCount <= 1) {
+      return { success: false, message: 'Cannot remove admin role from the last admin user' }
+    }
   }
 
   const { error } = await supabaseAdmin.auth.admin.updateUserById(

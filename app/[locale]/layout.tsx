@@ -14,7 +14,7 @@ async function getAppSettings() {
   const { data } = await supabase.from('_app_settings').select('key, value')
   const { data: { user } } = await supabase.auth.getUser()
   const settings = data?.reduce((acc, { key, value }) => ({ ...acc, [key]: value || '' }), {} as Record<string, string>) || {}
-  return { ...settings, user_email: user?.email || '' }
+  return { ...settings, user_email: user?.email || '' } as Record<string, string>
 }
 
 export default async function LocaleLayout({
@@ -36,9 +36,9 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <head>
-        <title>{(settings as any).app_title || 'Nexus Admin'}</title>
-        <meta name="description" content={(settings as any).app_description || 'Admin Dashboard'} />
-        {(settings as any).favicon_url && <link rel="icon" href={(settings as any).favicon_url} />}
+        <title>{settings.app_title || 'Nexus Admin'}</title>
+        <meta name="description" content={settings.app_description || 'Admin Dashboard'} />
+        {settings.favicon_url && <link rel="icon" href={settings.favicon_url} />}
 
       </head>
       <body>
