@@ -3,7 +3,7 @@ import { limiter } from '@/lib/rate-limit'
 
 export async function GET(request: NextRequest) {
   // Rate limit by IP
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'anonymous'
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous'
   const { success, remaining, reset } = limiter.api.check(60, ip)
   
   if (!success) {
