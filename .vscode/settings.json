@@ -8,5 +8,10 @@
   "debug.node.autoAttach": "on",
   "playwright.testIdAttribute": "data-testid",
   "playwright.showTrace": true,
-  "testing.automaticallyOpenPeekView": "never"
+  "testing.automaticallyOpenPeekView": "never",
+  "playwright.reuseBrowser": true,
+  "playwright.showBrowser": false,
+  "playwright.env": {
+    "NODE_ENV": "test"
+  }
 }
