@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-17
+
+### Added
+- PDF report generation with React-PDF
+- Shared PDF library (styles, components, utilities)
+- Reusable PDF components (PDFHeader, PDFTable, PDFFooter)
+- Product list PDF report template
+- Fixed table headers in PDF (display on every page)
+- Dynamic theme switching with CSS files
+- Theme loader component for client-side theme updates
+
+### Changed
+- Settings form now reloads page after save to apply theme changes
+- Settings query now orders by ID instead of category
+- Sticky table headers implementation improved
+
+### Fixed
+- Toast notification showing multiple times on settings save
+- Theme not changing when updating theme_name setting
+- Table headers not freezing on scroll
+- Settings fields reordering randomly
+
 ## [0.4.0] - 2026-01-17
 
 ### Added

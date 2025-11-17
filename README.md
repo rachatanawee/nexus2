@@ -11,12 +11,17 @@ Production-ready Next.js boilerplate with Supabase authentication, role-based ac
 - ✅ **Route Guards** (Middleware protection)
 - ✅ **Admin Dashboard** with collapsible sidebar & submenu
 - ✅ **User Management** - Full CRUD with role assignment
-- ✅ **TanStack Table** - Sorting, pagination, filtering, export
+- ✅ **DataTable** - TanStack Table v8 with advanced features
+  - Column sorting, resizing, visibility toggle
+  - Sticky headers, row selection, faceted filters
+  - Search with reset, export to Excel
+  - Advanced pagination (page size, first/last)
 - ✅ **CRUD Generator** - Auto-generate from Supabase schema
 - ✅ **App Settings & User Preferences** - Configurable system
 - ✅ **Format System** - Number/Date formatting with caching
 - ✅ **Profile Management** - User profiles with preferences
 - ✅ **System Tables** - Organized with "_" prefix
+- ✅ **PDF Reports** - React-PDF with shared components
 - ✅ **shadcn/ui Components**
 - ✅ **Tailwind CSS**
 - ✅ **Feature-Colocation** - Monolith architecture pattern
@@ -129,9 +134,9 @@ app/[locale]/(dashboard)/
 
 components/
 ├── ui/                     # shadcn/ui components
+│   └── data-table.tsx      # TanStack Table v8 wrapper
 ├── sidebar.tsx             # Collapsible sidebar with submenu
-├── dashboard-layout.tsx    # Dashboard wrapper
-└── data-table.tsx          # TanStack Table
+└── dashboard-layout.tsx    # Dashboard wrapper
 
 lib/
 ├── actions/
@@ -236,7 +241,8 @@ The script automatically creates:
 - ✅ **Types** - TypeScript interfaces from schema
 - ✅ **Queries** - Server-side data fetching
 - ✅ **Actions** - Create & delete server actions
-- ✅ **Table Component** - With sorting, search, pagination, export
+- ✅ **Columns** - Column definitions with sorting and formatting
+- ✅ **Table Component** - Using modern DataTable with all features
 - ✅ **Create Dialog** - Form with all fields
 - ✅ **Page** - Complete route with auth guard
 
@@ -343,11 +349,12 @@ See [docs/SYSTEM-TABLES.md](docs/SYSTEM-TABLES.md) for details.
 
 ## Documentation
 
-- [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) - Quick start guide
-- [docs/PERMISSIONS.md](docs/PERMISSIONS.md) - RBAC implementation
-- [docs/SYSTEM-TABLES.md](docs/SYSTEM-TABLES.md) - System tables documentation
-- [docs/APP-SETTINGS.md](docs/APP-SETTINGS.md) - Settings & preferences guide
+- [docs/GUIDE.md](docs/GUIDE.md) - Complete guide
 - [docs/CRUD-GENERATOR.md](docs/CRUD-GENERATOR.md) - CRUD generator documentation
+- [docs/PERMISSIONS.md](docs/PERMISSIONS.md) - RBAC implementation
+- [docs/CODING-STANDARDS.md](docs/CODING-STANDARDS.md) - Code style guide
+- [docs/DOCKER-DEPLOYMENT.md](docs/DOCKER-DEPLOYMENT.md) - Docker deployment
+- [docs/SETUP-ADMIN.md](docs/SETUP-ADMIN.md) - Admin setup guide
 - [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - Contributing guidelines
 - [docs/CHANGELOG.md](docs/CHANGELOG.md) - Version history
 - [Supabase Docs](https://supabase.com/docs)

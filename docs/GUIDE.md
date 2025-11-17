@@ -92,6 +92,23 @@ Add to `messages/en.json` and `messages/th.json`:
 }
 ```
 
+## PDF Reports
+
+**Generate PDF:**
+```typescript
+import { generatePDF } from '@/lib/pdf'
+import { ProductListPDF } from '../../reports/product-list-pdf'
+
+await generatePDF(
+  <ProductListPDF products={data} generatedBy={user} />,
+  'products.pdf'
+)
+```
+
+**Shared components:** PDFHeader, PDFTable, PDFFooter  
+**Location:** `lib/pdf/` (shared), `[feature]/reports/` (templates)  
+**Features:** Fixed headers, custom styles, multi-page support
+
 ## Deployment
 
 **Vercel:**
