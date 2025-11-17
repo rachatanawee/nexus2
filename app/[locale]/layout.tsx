@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { Toaster } from '@/components/toaster'
+import { ThemeLoader } from '@/components/theme-loader'
 import { SettingsProvider } from '@/lib/settings-context'
 import { PreferencesProvider } from '@/lib/preferences-context'
 import { createClient } from '@/lib/supabase/server'
@@ -34,16 +35,17 @@ export default async function LocaleLayout({
   const settings = await getAppSettings()
 
   return (
-    <html lang={locale}>
+    <html lang={locale} data-theme={settings.theme_name || 'tangerine'}>
       <head>
         <title>{settings.app_title || 'Nexus Admin'}</title>
         <meta name="description" content={settings.app_description || 'Admin Dashboard'} />
         {settings.favicon_url && <link rel="icon" href={settings.favicon_url} />}
-
+        <link rel="stylesheet" href={`/themes/${settings.theme_name || 'tangerine'}.css`} />
       </head>
       <body>
         <SettingsProvider settings={settings}>
           <PreferencesProvider>
+            <ThemeLoader />
             <NextIntlClientProvider messages={messages}>
               {children}
               <Toaster />

@@ -39,17 +39,21 @@ export function SettingsForm({ settings }: SettingsFormProps) {
     message: ''
   })
   const [isPending, startTransition] = useTransition()
+  const [lastMessage, setLastMessage] = useState('')
 
   useEffect(() => {
-    if (state.success) {
-      toast.success(state.message)
-      setHasChanges(false)
-      // Refresh cached preferences
-      refreshSettings()
-    } else if (state.message) {
-      toast.error(state.message)
+    if (state.message && state.message !== lastMessage) {
+      if (state.success) {
+        toast.success(state.message)
+        setHasChanges(false)
+        refreshSettings()
+        window.location.reload()
+      } else {
+        toast.error(state.message)
+      }
+      setLastMessage(state.message)
     }
-  }, [state, refreshSettings])
+  }, [state, refreshSettings, lastMessage])
 
   const handleChange = (key: string, value: string) => {
     setValues({ ...values, [key]: value })

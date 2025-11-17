@@ -6,7 +6,7 @@ export async function getAppSettings() {
   const { data, error } = await supabase
     .from('_app_settings')
     .select('*')
-    .order('category', { ascending: true })
+    .order('id', { ascending: true })
   
   if (error) return { data: null, error }
   return { data: data as AppSetting[], error: null }
