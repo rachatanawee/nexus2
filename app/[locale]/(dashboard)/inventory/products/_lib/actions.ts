@@ -1,43 +1,76 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
 
 type FormState = {
   success: boolean
   message: string
 }
 
+// Zod schemas for validation
+const productSchema = z.object({
+  name: z.preprocess((val) => val || '', z.string().min(1, 'Name is required')),
+  sku: z.preprocess((val) => val || '', z.string().min(1, 'SKU is required')),
+  description: z.string().optional(),
+  category_id: z.string().optional(),
+  price: z.preprocess((val) => val ? parseFloat(val as string) : undefined, z.number().positive('Price must be positive')),
+  cost: z.preprocess((val) => val ? parseFloat(val as string) : undefined, z.number().positive('Cost must be positive')),
+  stock_quantity: z.preprocess((val) => val ? parseFloat(val as string) : undefined, z.number().min(0, 'Stock quantity must be non-negative')),
+  min_stock_level: z.preprocess((val) => val ? parseFloat(val as string) : undefined, z.number().min(0, 'Min stock level must be non-negative').optional()),
+  image_url: z.string().url('Invalid image URL').optional().or(z.literal('')),
+  is_active: z.boolean().optional(),
+})
+
+const createProductSchema = productSchema
+
+const updateProductSchema = productSchema.extend({
+  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
+})
+
+const deleteProductSchema = z.object({
+  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
+})
+
 export async function createProduct(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
     const supabase = await createClient()
-  const name = formData.get('name') as string
-  if (!name) return { success: false, message: 'Name is required' }
-  const sku = formData.get('sku') as string
-  if (!sku) return { success: false, message: 'Sku is required' }
-  const description = formData.get('description') as string
-  const category_id = formData.get('category_id') as string
-  const price = parseFloat(formData.get('price') as string)
-  if (!price || isNaN(price)) return { success: false, message: 'Price is required' }
-  const cost = parseFloat(formData.get('cost') as string)
-  if (!cost || isNaN(cost)) return { success: false, message: 'Cost is required' }
-  const stock_quantity = parseFloat(formData.get('stock_quantity') as string)
-  if (!stock_quantity || isNaN(stock_quantity)) return { success: false, message: 'Stock_quantity is required' }
-  const min_stock_level = parseFloat(formData.get('min_stock_level') as string)
-  const image_url = formData.get('image_url') as string
-  const is_active = formData.get('is_active') as string
+
+    // Convert FormData to object for validation
+    const rawData = {
+      name: formData.get('name') || undefined,
+      sku: formData.get('sku') || undefined,
+      description: formData.get('description') || undefined,
+      category_id: formData.get('category_id') || undefined,
+      price: formData.get('price') ? parseFloat(formData.get('price') as string) : undefined,
+      cost: formData.get('cost') ? parseFloat(formData.get('cost') as string) : undefined,
+      stock_quantity: formData.get('stock_quantity') ? parseFloat(formData.get('stock_quantity') as string) : undefined,
+      min_stock_level: formData.get('min_stock_level') ? parseFloat(formData.get('min_stock_level') as string) : undefined,
+      image_url: formData.get('image_url') || undefined,
+      is_active: formData.get('is_active') ? formData.get('is_active') === 'true' : undefined,
+    }
+
+    // Validate data
+    const validationResult = createProductSchema.safeParse(rawData)
+    if (!validationResult.success) {
+      return { success: false, message: validationResult.error.issues[0].message }
+    }
+
+    const data = validationResult.data
 
     const { error } = await supabase.from('products').insert({
-    name: name,
-    sku: sku,
-    description: description || null,
-    category_id: category_id || null,
-    price: price,
-    cost: cost,
-    stock_quantity: stock_quantity,
-    min_stock_level: min_stock_level || null,
-    image_url: image_url || null,
-    is_active: is_active || null
+      name: data.name,
+      sku: data.sku,
+      description: data.description || null,
+      category_id: data.category_id || null,
+      price: data.price,
+      cost: data.cost,
+      stock_quantity: data.stock_quantity,
+      min_stock_level: data.min_stock_level || null,
+      image_url: data.image_url || null,
+      is_active: data.is_active || null
     })
+
     if (error) return { success: false, message: error.message }
     return { success: true, message: 'Product created successfully' }
   } catch (err) {
@@ -48,36 +81,43 @@ export async function createProduct(prevState: FormState, formData: FormData): P
 export async function updateProduct(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
     const supabase = await createClient()
-    const id = formData.get('id') as string
-    if (!id) return { success: false, message: 'ID is required' }
-  const name = formData.get('name') as string
-  if (!name) return { success: false, message: 'Name is required' }
-  const sku = formData.get('sku') as string
-  if (!sku) return { success: false, message: 'Sku is required' }
-  const description = formData.get('description') as string
-  const category_id = formData.get('category_id') as string
-  const price = parseFloat(formData.get('price') as string)
-  if (!price || isNaN(price)) return { success: false, message: 'Price is required' }
-  const cost = parseFloat(formData.get('cost') as string)
-  if (!cost || isNaN(cost)) return { success: false, message: 'Cost is required' }
-  const stock_quantity = parseFloat(formData.get('stock_quantity') as string)
-  if (!stock_quantity || isNaN(stock_quantity)) return { success: false, message: 'Stock_quantity is required' }
-  const min_stock_level = parseFloat(formData.get('min_stock_level') as string)
-  const image_url = formData.get('image_url') as string
-  const is_active = formData.get('is_active') as string
+
+    // Convert FormData to object for validation
+    const rawData = {
+      id: formData.get('id') || undefined,
+      name: formData.get('name') || undefined,
+      sku: formData.get('sku') || undefined,
+      description: formData.get('description') || undefined,
+      category_id: formData.get('category_id') || undefined,
+      price: formData.get('price') ? parseFloat(formData.get('price') as string) : undefined,
+      cost: formData.get('cost') ? parseFloat(formData.get('cost') as string) : undefined,
+      stock_quantity: formData.get('stock_quantity') ? parseFloat(formData.get('stock_quantity') as string) : undefined,
+      min_stock_level: formData.get('min_stock_level') ? parseFloat(formData.get('min_stock_level') as string) : undefined,
+      image_url: formData.get('image_url') || undefined,
+      is_active: formData.get('is_active') ? formData.get('is_active') === 'true' : undefined,
+    }
+
+    // Validate data
+    const validationResult = updateProductSchema.safeParse(rawData)
+    if (!validationResult.success) {
+      return { success: false, message: validationResult.error.issues[0].message }
+    }
+
+    const data = validationResult.data
 
     const { error } = await supabase.from('products').update({
-    name: name,
-    sku: sku,
-    description: description || null,
-    category_id: category_id || null,
-    price: price,
-    cost: cost,
-    stock_quantity: stock_quantity,
-    min_stock_level: min_stock_level || null,
-    image_url: image_url || null,
-    is_active: is_active || null
-    }).eq('id', id)
+      name: data.name,
+      sku: data.sku,
+      description: data.description || null,
+      category_id: data.category_id || null,
+      price: data.price,
+      cost: data.cost,
+      stock_quantity: data.stock_quantity,
+      min_stock_level: data.min_stock_level || null,
+      image_url: data.image_url || null,
+      is_active: data.is_active || null
+    }).eq('id', data.id)
+
     if (error) return { success: false, message: error.message }
     return { success: true, message: 'Product updated successfully' }
   } catch (err) {
@@ -86,10 +126,26 @@ export async function updateProduct(prevState: FormState, formData: FormData): P
 }
 
 export async function deleteProduct(prevState: FormState, formData: FormData): Promise<FormState> {
-  const supabase = await createClient()
-  const id = formData.get('id') as string
-  if (!id) return { success: false, message: 'ID is required' }
-  const { error } = await supabase.from('products').delete().eq('id', id)
-  if (error) return { success: false, message: error.message }
-  return { success: true, message: 'Product deleted successfully' }
+  try {
+    const supabase = await createClient()
+
+    // Convert FormData to object for validation
+    const rawData = {
+      id: formData.get('id') || undefined,
+    }
+
+    // Validate data
+    const validationResult = deleteProductSchema.safeParse(rawData)
+    if (!validationResult.success) {
+      return { success: false, message: validationResult.error.issues[0].message }
+    }
+
+    const data = validationResult.data
+
+    const { error } = await supabase.from('products').delete().eq('id', data.id)
+    if (error) return { success: false, message: error.message }
+    return { success: true, message: 'Product deleted successfully' }
+  } catch (err) {
+    return { success: false, message: 'Unexpected error occurred' }
+  }
 }

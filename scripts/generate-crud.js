@@ -103,31 +103,88 @@ export async function get${Feature}s() {
 }
 `)
 
-  // actions.ts
-  const createFields = fields.map(f => {
-    const getter = f.tsType === 'number' ? `parseFloat(formData.get('${f.name}') as string)` : `formData.get('${f.name}') as string`
-    const validation = f.required ? `  if (!${f.name}${f.tsType === 'number' ? ' || isNaN(' + f.name + ')' : ''}) return { success: false, message: '${capitalize(f.name)} is required' }\n` : ''
-    return `  const ${f.name} = ${getter}\n${validation}`
-  }).join('')
+  // actions.ts - Generate Zod schemas
+  const zodFields = fields.map(f => {
+    let zodType = 'z.string()'
+    if (f.tsType === 'number') {
+      zodType = 'z.number()'
+      if (f.name.toLowerCase().includes('price') || f.name.toLowerCase().includes('cost')) {
+        zodType += '.positive()'
+      } else if (f.name.toLowerCase().includes('quantity') || f.name.toLowerCase().includes('stock')) {
+        zodType += '.min(0)'
+      }
+    } else if (f.tsType === 'boolean') {
+      zodType = 'z.boolean()'
+    }
 
-  const insertData = fields.map(f => `    ${f.name}: ${f.name}${!f.required ? ' || null' : ''}`).join(',\n')
+    if (f.required) {
+      const preprocess = f.tsType === 'number'
+        ? `z.preprocess((val) => val ? parseFloat(val as string) : undefined, ${zodType})`
+        : `z.preprocess((val) => val || '', ${zodType}.min(1, '${capitalize(f.name)} is required'))`
+      return `  ${f.name}: ${preprocess},`
+    } else {
+      return `  ${f.name}: ${zodType}.optional(),`
+    }
+  }).join('\n')
+
+  const rawDataFields = fields.map(f => {
+    if (f.tsType === 'number') {
+      return `      ${f.name}: formData.get('${f.name}') ? parseFloat(formData.get('${f.name}') as string) : undefined,`
+    } else if (f.tsType === 'boolean') {
+      return `      ${f.name}: formData.get('${f.name}') ? formData.get('${f.name}') === 'true' : undefined,`
+    } else {
+      return `      ${f.name}: formData.get('${f.name}') || undefined,`
+    }
+  }).join('\n')
+
+  const insertData = fields.map(f => `      ${f.name}: data.${f.name}${!f.required ? ' || null' : ''}`).join(',\n')
 
   fs.writeFileSync(`${basePath}/_lib/actions.ts`, `'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
 
 type FormState = {
   success: boolean
   message: string
 }
 
+// Zod schemas for validation
+const ${singular}Schema = z.object({
+${zodFields}
+})
+
+const create${Feature}Schema = ${singular}Schema
+
+const update${Feature}Schema = ${singular}Schema.extend({
+  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
+})
+
+const delete${Feature}Schema = z.object({
+  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
+})
+
 export async function create${Feature}(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
     const supabase = await createClient()
-${createFields}
+
+    // Convert FormData to object for validation
+    const rawData = {
+${rawDataFields}
+    }
+
+    // Validate data
+    const validationResult = create${Feature}Schema.safeParse(rawData)
+    if (!validationResult.success) {
+      return { success: false, message: validationResult.error.issues[0].message }
+    }
+
+    const data = validationResult.data
+
     const { error } = await supabase.from('${tableName}').insert({
 ${insertData}
     })
+
     if (error) return { success: false, message: error.message }
     return { success: true, message: '${Feature} created successfully' }
   } catch (err) {
@@ -138,12 +195,25 @@ ${insertData}
 export async function update${Feature}(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
     const supabase = await createClient()
-    const id = formData.get('id') as string
-    if (!id) return { success: false, message: 'ID is required' }
-${createFields}
+
+    // Convert FormData to object for validation
+    const rawData = {
+      id: formData.get('id') || undefined,
+${rawDataFields}
+    }
+
+    // Validate data
+    const validationResult = update${Feature}Schema.safeParse(rawData)
+    if (!validationResult.success) {
+      return { success: false, message: validationResult.error.issues[0].message }
+    }
+
+    const data = validationResult.data
+
     const { error } = await supabase.from('${tableName}').update({
 ${insertData}
-    }).eq('id', id)
+    }).eq('id', data.id)
+
     if (error) return { success: false, message: error.message }
     return { success: true, message: '${Feature} updated successfully' }
   } catch (err) {
@@ -152,12 +222,28 @@ ${insertData}
 }
 
 export async function delete${Feature}(prevState: FormState, formData: FormData): Promise<FormState> {
-  const supabase = await createClient()
-  const id = formData.get('id') as string
-  if (!id) return { success: false, message: 'ID is required' }
-  const { error } = await supabase.from('${tableName}').delete().eq('id', id)
-  if (error) return { success: false, message: error.message }
-  return { success: true, message: '${Feature} deleted successfully' }
+  try {
+    const supabase = await createClient()
+
+    // Convert FormData to object for validation
+    const rawData = {
+      id: formData.get('id') || undefined,
+    }
+
+    // Validate data
+    const validationResult = delete${Feature}Schema.safeParse(rawData)
+    if (!validationResult.success) {
+      return { success: false, message: validationResult.error.issues[0].message }
+    }
+
+    const data = validationResult.data
+
+    const { error } = await supabase.from('${tableName}').delete().eq('id', data.id)
+    if (error) return { success: false, message: error.message }
+    return { success: true, message: '${Feature} deleted successfully' }
+  } catch (err) {
+    return { success: false, message: 'Unexpected error occurred' }
+  }
 }
 `)
 

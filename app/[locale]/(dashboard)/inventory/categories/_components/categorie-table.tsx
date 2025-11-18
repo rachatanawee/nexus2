@@ -7,17 +7,17 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { CategorieFormDialog } from "./categorie-form-dialog"
 
-interface CategoryTableProps {
+interface CategorieTableProps {
   data: Categorie[]
 }
 
-export function CategorieTable({ data }: CategoryTableProps) {
+export function CategorieTable({ data }: CategorieTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => setCreateOpen(true)}>Create Category</Button>
+        <Button onClick={() => setCreateOpen(true)}>Create Categorie</Button>
       </div>
       <DataTable 
         columns={columns} 

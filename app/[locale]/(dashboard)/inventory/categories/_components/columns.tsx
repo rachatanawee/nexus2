@@ -15,17 +15,12 @@ import { formatSystemDate } from "@/lib/format-utils"
 export const columns: ColumnDef<Categorie>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        Name
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
   },
   {
     accessorKey: "description",
@@ -37,17 +32,12 @@ export const columns: ColumnDef<Categorie>[] = [
   },
   {
     accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Created
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => (
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        Created
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: function DateCell({ row }) {
       const { settings } = usePreferences()
       const dateFormat = settings?.date_format || 'MM/dd/yyyy'
@@ -83,19 +73,10 @@ export const columns: ColumnDef<Categorie>[] = [
           <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDelete}
-            disabled={deleting}
-          >
+          <Button variant="outline" size="sm" onClick={handleDelete} disabled={deleting}>
             <Trash2 className="h-4 w-4" />
           </Button>
-          <CategorieFormDialog 
-            open={editOpen} 
-            onOpenChange={setEditOpen} 
-            categorie={row.original} 
-          />
+          <CategorieFormDialog open={editOpen} onOpenChange={setEditOpen} categorie={row.original} />
         </div>
       )
     },
