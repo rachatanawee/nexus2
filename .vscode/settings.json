@@ -13,5 +13,6 @@
   "playwright.showBrowser": false,
   "playwright.env": {
     "NODE_ENV": "test"
-  }
+  },
+  "bun.test.enable": false
 }
