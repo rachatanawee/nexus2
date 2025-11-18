@@ -22,6 +22,8 @@ Production-ready Next.js boilerplate with Supabase authentication, role-based ac
 - ✅ **Profile Management** - User profiles with preferences
 - ✅ **System Tables** - Organized with "_" prefix
 - ✅ **PDF Reports** - React-PDF with shared components
+- ✅ **Testing Suite** - Jest + React Testing Library + Playwright
+- ✅ **Form Validation** - Zod schemas with type safety
 - ✅ **shadcn/ui Components**
 - ✅ **Tailwind CSS**
 - ✅ **Feature-Colocation** - Monolith architecture pattern
@@ -117,6 +119,18 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
+### 6. Run Tests (Optional)
+```bash
+# Unit & Integration Tests
+bun test
+
+# UI Tests (E2E)
+bun test:e2e
+
+# Test Coverage
+bun test:coverage
+```
+
 ## Project Structure
 
 ```
@@ -145,8 +159,21 @@ lib/
 │   ├── client.ts           # Browser client
 │   ├── server.ts           # Server client
 │   └── middleware.ts       # Auth middleware
+├── validations/            # Zod schemas
+│   ├── auth.ts             # Auth validation
+│   └── user.ts             # User validation
 ├── permissions.ts          # RBAC helpers
 └── utils.ts
+
+__tests__/                  # Test files
+├── components/             # Component tests
+├── pages/                  # Page tests
+└── lib/                    # Utility tests
+
+e2e/                        # Playwright E2E tests
+├── auth.spec.ts
+├── dashboard.spec.ts
+└── users.spec.ts
 
 messages/
 ├── en.json                 # English translations
@@ -278,6 +305,156 @@ bun scripts/generate-crud.js inventory/suppliers suppliers
 
 See [docs/CRUD-GENERATOR.md](docs/CRUD-GENERATOR.md) for detailed guide.
 
+## Testing
+
+### Unit & Integration Tests (Jest)
+
+```bash
+# Run all tests
+bun test
+
+# Watch mode
+bun test:watch
+
+# Coverage report
+bun test:coverage
+```
+
+**Test Structure:**
+```
+__tests__/
+├── components/
+│   ├── ui/
+│   │   └── data-table.test.tsx
+│   └── sidebar.test.tsx
+├── pages/
+│   └── dashboard.test.tsx
+└── lib/
+    ├── permissions.test.ts
+    └── validations.test.ts
+```
+
+**Example Component Test:**
+```typescript
+import { render, screen } from '@testing-library/react'
+import { Sidebar } from '@/components/sidebar'
+
+describe('Sidebar', () => {
+  it('renders navigation items', () => {
+    render(<Sidebar collapsed={false} />)
+    expect(screen.getByText('Dashboard')).toBeInTheDocument()
+  })
+})
+```
+
+### UI Tests (Playwright)
+
+```bash
+# Run E2E tests
+bun test:e2e
+
+# Run with UI
+bun test:e2e:ui
+
+# Generate tests
+bun test:e2e:codegen
+```
+
+**Example E2E Test:**
+```typescript
+import { test, expect } from '@playwright/test'
+
+test('user can login and access dashboard', async ({ page }) => {
+  await page.goto('/en/login')
+  await page.fill('[name="email"]', 'admin@example.com')
+  await page.fill('[name="password"]', 'password')
+  await page.click('button[type="submit"]')
+  
+  await expect(page).toHaveURL('/en/dashboard')
+  await expect(page.locator('h1')).toContainText('Dashboard')
+})
+```
+
+### Form Validation (Zod)
+
+**Schema Definition:**
+```typescript
+// lib/validations/user.ts
+import { z } from 'zod'
+
+export const createUserSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  full_name: z.string().min(1, 'Full name is required'),
+  roles: z.array(z.enum(['admin', 'manager', 'user'])).min(1)
+})
+
+export type CreateUserInput = z.infer<typeof createUserSchema>
+```
+
+**Server Action Validation:**
+```typescript
+// app/[locale]/(dashboard)/users/_lib/actions.ts
+import { createUserSchema } from '@/lib/validations/user'
+
+export async function createUser(formData: FormData) {
+  const validatedFields = createUserSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+    full_name: formData.get('full_name'),
+    roles: formData.getAll('roles')
+  })
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors
+    }
+  }
+
+  // Process validated data
+  const { email, password, full_name, roles } = validatedFields.data
+  // ...
+}
+```
+
+**Client-side Validation:**
+```typescript
+// components/create-user-dialog.tsx
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { createUserSchema, type CreateUserInput } from '@/lib/validations/user'
+
+export function CreateUserDialog() {
+  const form = useForm<CreateUserInput>({
+    resolver: zodResolver(createUserSchema)
+  })
+
+  return (
+    <Form {...form}>
+      <FormField
+        control={form.control}
+        name="email"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Email</FormLabel>
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </Form>
+  )
+}
+```
+
+**Benefits:**
+- ✅ **Type Safety** - Automatic TypeScript types from schemas
+- ✅ **Reusable** - Same schema for client and server validation
+- ✅ **Error Handling** - Structured error messages
+- ✅ **Performance** - Client-side validation prevents unnecessary requests
+
 ## Adding New Features Manually
 
 ### 1. Create Feature Folder
@@ -343,6 +520,8 @@ See [docs/SYSTEM-TABLES.md](docs/SYSTEM-TABLES.md) for details.
 - **Styling:** Tailwind CSS v4
 - **UI Components:** shadcn/ui
 - **Tables:** TanStack Table
+- **Testing:** Jest + React Testing Library + Playwright
+- **Validation:** Zod
 - **i18n:** next-intl
 - **Language:** TypeScript
 - **Package Manager:** Bun
@@ -351,6 +530,8 @@ See [docs/SYSTEM-TABLES.md](docs/SYSTEM-TABLES.md) for details.
 
 - [docs/GUIDE.md](docs/GUIDE.md) - Complete guide
 - [docs/CRUD-GENERATOR.md](docs/CRUD-GENERATOR.md) - CRUD generator documentation
+- [docs/TESTING.md](docs/TESTING.md) - Testing guide (Jest + Playwright)
+- [docs/VALIDATION.md](docs/VALIDATION.md) - Zod validation patterns
 - [docs/PERMISSIONS.md](docs/PERMISSIONS.md) - RBAC implementation
 - [docs/CODING-STANDARDS.md](docs/CODING-STANDARDS.md) - Code style guide
 - [docs/DOCKER-DEPLOYMENT.md](docs/DOCKER-DEPLOYMENT.md) - Docker deployment

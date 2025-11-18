@@ -1,6 +1,15 @@
 // Optional: Add global test setup here
 // For example, you can set up global mocks or configure testing-library
 
+// Load environment variables from .env.local
+import { config } from 'dotenv'
+config({ path: '.env.local' })
+
+// Polyfills for Next.js server actions
+import { TextEncoder, TextDecoder } from 'util'
+global.TextEncoder = TextEncoder
+global.TextDecoder = TextDecoder
+
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter() {
@@ -18,7 +27,7 @@ jest.mock('next/navigation', () => ({
   },
 }))
 
-// Mock environment variables
-process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
-process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key'
+// Mock Next.js cache
+jest.mock('next/cache', () => ({
+  revalidatePath: jest.fn(),
+}))

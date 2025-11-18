@@ -14,5 +14,6 @@
   "playwright.env": {
     "NODE_ENV": "test"
   },
-  "bun.test.enable": false
+  "bun.test.enable": true,
+  "bun.test.exclude": ["tests/e2e/**"]
 }
