@@ -15,5 +15,6 @@
     "NODE_ENV": "test"
   },
   "bun.test.enable": true,
-  "bun.test.exclude": ["tests/e2e/**"]
+  "bun.test.exclude": ["tests/e2e/**"],
+  "npm.packageManager": "bun"
 }
