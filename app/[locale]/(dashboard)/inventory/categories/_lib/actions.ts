@@ -1,29 +1,12 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { z } from 'zod'
+import { createCategorieSchema, updateCategorieSchema, deleteCategorieSchema } from './validation'
 
 type FormState = {
   success: boolean
   message: string
 }
-
-// Zod schemas for validation
-const categorieSchema = z.object({
-  name: z.preprocess((val) => val || '', z.string().min(1, 'Name is required')),
-  description: z.string().optional(),
-  icon: z.string().optional(),
-})
-
-const createCategorieSchema = categorieSchema
-
-const updateCategorieSchema = categorieSchema.extend({
-  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
-})
-
-const deleteCategorieSchema = z.object({
-  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
-})
 
 export async function createCategorie(prevState: FormState, formData: FormData): Promise<FormState> {
   try {

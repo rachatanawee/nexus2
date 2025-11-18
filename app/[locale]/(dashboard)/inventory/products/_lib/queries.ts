@@ -7,7 +7,7 @@ export async function getProducts() {
     .from('products')
     .select('*')
     .order('created_at', { ascending: false })
-  
+
   if (error) return { data: null, error }
   return { data: data as Product[], error: null }
 }

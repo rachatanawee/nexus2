@@ -7,7 +7,7 @@ export async function getWarehouses() {
     .from('warehouses')
     .select('*')
     .order('created_at', { ascending: false })
-  
+
   if (error) return { data: null, error }
   return { data: data as Warehouse[], error: null }
 }

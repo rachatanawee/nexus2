@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
+import { createUserSchema } from './validation'
+import type { ZodIssue } from 'zod'
 
 type FormState = {
   success: boolean
@@ -30,8 +32,16 @@ export async function createUser(
   const rolesInput = formData.get('roles') as string
   const roles = rolesInput.split(',').map(r => r.trim()).filter(Boolean)
 
-  if (!email || !password) {
-    return { success: false, message: 'Email and password required' }
+  // Validate input data using shared Zod schema
+  const validationResult = createUserSchema.safeParse({
+    email,
+    password,
+    roles
+  })
+
+  if (!validationResult.success) {
+    const errorMessages = validationResult.error.issues.map((err: ZodIssue) => err.message).join(', ')
+    return { success: false, message: errorMessages }
   }
 
   const { error } = await supabaseAdmin.auth.admin.createUser({

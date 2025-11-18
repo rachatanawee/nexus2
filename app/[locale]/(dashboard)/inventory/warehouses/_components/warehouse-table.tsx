@@ -19,9 +19,9 @@ export function WarehouseTable({ data }: WarehouseTableProps) {
       <div className="flex justify-end">
         <Button onClick={() => setCreateOpen(true)}>Create Warehouse</Button>
       </div>
-      <DataTable 
-        columns={columns} 
-        data={data} 
+      <DataTable
+        columns={columns}
+        data={data}
         searchKey="name"
         searchPlaceholder="Search warehouses..."
         enableExport={true}

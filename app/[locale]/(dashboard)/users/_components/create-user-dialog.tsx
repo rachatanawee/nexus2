@@ -7,30 +7,51 @@ import { Label } from '@/components/ui/label'
 import { useState } from 'react'
 import { createUser } from '../_lib/actions'
 import { toast } from 'sonner'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { createUserSchema, AVAILABLE_ROLES, type CreateUserFormData } from '../_lib/validation'
 
 interface CreateUserDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-const AVAILABLE_ROLES = ['admin', 'manager', 'user']
-
 export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) {
-  const [selectedRoles, setSelectedRoles] = useState<string[]>(['user'])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
-  const toggleRole = (role: string) => {
-    setSelectedRoles(prev =>
-      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
-    )
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+    reset
+  } = useForm<CreateUserFormData>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      roles: ['user']
+    }
+  })
+
+  const selectedRoles = watch('roles') || []
+
+  const toggleRole = (role: typeof AVAILABLE_ROLES[number]) => {
+    const currentRoles = selectedRoles
+    const newRoles = currentRoles.includes(role)
+      ? currentRoles.filter(r => r !== role)
+      : [...currentRoles, role]
+    setValue('roles', newRoles)
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const onSubmit = async (data: CreateUserFormData) => {
     setLoading(true)
-    const formData = new FormData(e.currentTarget)
-    formData.append('roles', selectedRoles.join(','))
+    const formData = new FormData()
+    formData.append('email', data.email)
+    formData.append('password', data.password)
+    formData.append('roles', data.roles.join(','))
 
     const result = await createUser({ success: false, message: '' }, formData)
     setLoading(false)
@@ -38,8 +59,7 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
     if (result.success) {
       toast.success(result.message)
       onOpenChange(false)
-      setSelectedRoles(['user'])
-      e.currentTarget.reset()
+      reset()
     } else {
       toast.error(result.message)
       setMessage(result.message)
@@ -52,14 +72,30 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
         <DialogHeader>
           <DialogTitle>Create New User</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required />
+            <Input
+              id="email"
+              type="email"
+              {...register('email')}
+              className={errors.email ? 'border-red-500' : ''}
+            />
+            {errors.email && (
+              <p className="text-sm text-red-600">{errors.email.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" required minLength={6} />
+            <Input
+              id="password"
+              type="password"
+              {...register('password')}
+              className={errors.password ? 'border-red-500' : ''}
+            />
+            {errors.password && (
+              <p className="text-sm text-red-600">{errors.password.message}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Roles</Label>
@@ -74,6 +110,9 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
                 <span className="capitalize">{role}</span>
               </label>
             ))}
+            {errors.roles && (
+              <p className="text-sm text-red-600">{errors.roles.message}</p>
+            )}
           </div>
           {message && (
             <p className={`text-sm ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>

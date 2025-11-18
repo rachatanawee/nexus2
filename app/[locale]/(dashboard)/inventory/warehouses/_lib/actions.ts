@@ -1,34 +1,13 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { z } from 'zod'
+import { createWarehouseSchema, updateWarehouseSchema, deleteWarehouseSchema } from './validation'
+import type { ZodIssue } from 'zod'
 
 type FormState = {
   success: boolean
   message: string
 }
-
-// Zod schemas for validation
-const warehouseSchema = z.object({
-  name: z.preprocess((val) => val || '', z.string().min(1, 'Name is required')),
-  code: z.preprocess((val) => val || '', z.string().min(1, 'Code is required')),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  manager_name: z.string().optional(),
-  phone: z.string().optional(),
-  is_active: z.boolean().optional(),
-})
-
-const createWarehouseSchema = warehouseSchema
-
-const updateWarehouseSchema = warehouseSchema.extend({
-  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
-})
-
-const deleteWarehouseSchema = z.object({
-  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
-})
 
 export async function createWarehouse(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
@@ -46,10 +25,11 @@ export async function createWarehouse(prevState: FormState, formData: FormData):
       is_active: formData.get('is_active') ? formData.get('is_active') === 'true' : undefined,
     }
 
-    // Validate data
+    // Validate data using shared Zod schema
     const validationResult = createWarehouseSchema.safeParse(rawData)
     if (!validationResult.success) {
-      return { success: false, message: validationResult.error.issues[0].message }
+      const errorMessages = validationResult.error.issues.map((err: ZodIssue) => err.message).join(', ')
+      return { success: false, message: errorMessages }
     }
 
     const data = validationResult.data
@@ -89,10 +69,11 @@ export async function updateWarehouse(prevState: FormState, formData: FormData):
       is_active: formData.get('is_active') ? formData.get('is_active') === 'true' : undefined,
     }
 
-    // Validate data
+    // Validate data using shared Zod schema
     const validationResult = updateWarehouseSchema.safeParse(rawData)
     if (!validationResult.success) {
-      return { success: false, message: validationResult.error.issues[0].message }
+      const errorMessages = validationResult.error.issues.map((err: ZodIssue) => err.message).join(', ')
+      return { success: false, message: errorMessages }
     }
 
     const data = validationResult.data
@@ -124,10 +105,11 @@ export async function deleteWarehouse(prevState: FormState, formData: FormData):
       id: formData.get('id') || undefined,
     }
 
-    // Validate data
+    // Validate data using shared Zod schema
     const validationResult = deleteWarehouseSchema.safeParse(rawData)
     if (!validationResult.success) {
-      return { success: false, message: validationResult.error.issues[0].message }
+      const errorMessages = validationResult.error.issues.map((err: ZodIssue) => err.message).join(', ')
+      return { success: false, message: errorMessages }
     }
 
     const data = validationResult.data

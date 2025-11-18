@@ -1,36 +1,13 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { z } from 'zod'
+import { createSupplierSchema, updateSupplierSchema, deleteSupplierSchema } from './validation'
+import type { ZodIssue } from 'zod'
 
 type FormState = {
   success: boolean
   message: string
 }
-
-// Zod schemas for validation
-const supplierSchema = z.object({
-  name: z.preprocess((val) => val || '', z.string().min(1, 'Name is required')),
-  code: z.preprocess((val) => val || '', z.string().min(1, 'Code is required')),
-  contact_person: z.string().optional(),
-  email: z.string().optional(),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  payment_terms: z.string().optional(),
-  is_active: z.boolean().optional(),
-})
-
-const createSupplierSchema = supplierSchema
-
-const updateSupplierSchema = supplierSchema.extend({
-  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
-})
-
-const deleteSupplierSchema = z.object({
-  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
-})
 
 export async function createSupplier(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
@@ -50,10 +27,11 @@ export async function createSupplier(prevState: FormState, formData: FormData): 
       is_active: formData.get('is_active') ? formData.get('is_active') === 'true' : undefined,
     }
 
-    // Validate data
+    // Validate data using shared Zod schema
     const validationResult = createSupplierSchema.safeParse(rawData)
     if (!validationResult.success) {
-      return { success: false, message: validationResult.error.issues[0].message }
+      const errorMessages = validationResult.error.issues.map((err: ZodIssue) => err.message).join(', ')
+      return { success: false, message: errorMessages }
     }
 
     const data = validationResult.data
@@ -97,10 +75,11 @@ export async function updateSupplier(prevState: FormState, formData: FormData): 
       is_active: formData.get('is_active') ? formData.get('is_active') === 'true' : undefined,
     }
 
-    // Validate data
+    // Validate data using shared Zod schema
     const validationResult = updateSupplierSchema.safeParse(rawData)
     if (!validationResult.success) {
-      return { success: false, message: validationResult.error.issues[0].message }
+      const errorMessages = validationResult.error.issues.map((err: ZodIssue) => err.message).join(', ')
+      return { success: false, message: errorMessages }
     }
 
     const data = validationResult.data
@@ -134,10 +113,11 @@ export async function deleteSupplier(prevState: FormState, formData: FormData): 
       id: formData.get('id') || undefined,
     }
 
-    // Validate data
+    // Validate data using shared Zod schema
     const validationResult = deleteSupplierSchema.safeParse(rawData)
     if (!validationResult.success) {
-      return { success: false, message: validationResult.error.issues[0].message }
+      const errorMessages = validationResult.error.issues.map((err: ZodIssue) => err.message).join(', ')
+      return { success: false, message: errorMessages }
     }
 
     const data = validationResult.data

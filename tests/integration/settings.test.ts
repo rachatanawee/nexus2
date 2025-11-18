@@ -54,7 +54,7 @@ describe('Settings Server Actions (Integration)', () => {
         getUser: jest.fn()
       }
     }
-    mockCreateClient.mockResolvedValue(mockSupabaseClient)
+    mockCreateClient.mockResolvedValue(mockSupabaseClient as any)
   })
 
   afterEach(() => {
@@ -84,7 +84,7 @@ describe('Settings Server Actions (Integration)', () => {
           })
         }))
       }
-      mockCreateClient.mockResolvedValue(mockSupabaseClient)
+      mockCreateClient.mockResolvedValue(mockSupabaseClient as any)
       mockIsAdmin.mockReturnValue(true)
 
       const updates = { 'site_title': 'New Title', 'theme': 'dark' }
@@ -119,7 +119,7 @@ describe('Settings Server Actions (Integration)', () => {
           getUser: jest.fn().mockResolvedValue({ data: { user: null } })
         }
       }
-      mockCreateClient.mockResolvedValue(mockSupabaseClient)
+      mockCreateClient.mockResolvedValue(mockSupabaseClient as any)
 
       const formData = new FormData()
       formData.append('updates', JSON.stringify({ 'site_title': 'New Title' }))
@@ -141,7 +141,7 @@ describe('Settings Server Actions (Integration)', () => {
           getUser: jest.fn().mockResolvedValue({ data: { user: regularUser } })
         }
       }
-      mockCreateClient.mockResolvedValue(mockSupabaseClient)
+      mockCreateClient.mockResolvedValue(mockSupabaseClient as any)
       mockIsAdmin.mockReturnValue(false)
 
       const formData = new FormData()
@@ -169,7 +169,7 @@ describe('Settings Server Actions (Integration)', () => {
           })
         }))
       }
-      mockCreateClient.mockResolvedValue(mockSupabaseClient)
+      mockCreateClient.mockResolvedValue(mockSupabaseClient as any)
       mockIsAdmin.mockReturnValue(true)
 
       const updates = { 'site_title': 'New Title' }

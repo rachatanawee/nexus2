@@ -19,9 +19,9 @@ export function SupplierTable({ data }: SupplierTableProps) {
       <div className="flex justify-end">
         <Button onClick={() => setCreateOpen(true)}>Create Supplier</Button>
       </div>
-      <DataTable 
-        columns={columns} 
-        data={data} 
+      <DataTable
+        columns={columns}
+        data={data}
         searchKey="name"
         searchPlaceholder="Search suppliers..."
         enableExport={true}

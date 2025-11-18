@@ -1,5 +1,10 @@
-// สร้างไฟล์ใหม่ชื่อ setup-admin-MERGE.js
-const { createClient } = require('@supabase/supabase-js');
+#!/usr/bin/env node
+
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+
+// โหลด environment variables
+dotenv.config({ path: '.env.local' });
 
 // ตรวจสอบว่า .env ถูกโหลดหรือยัง
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -13,8 +18,13 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-async function setupAdmin() {
-  const USER_EMAIL = 'admin@test.com';
+interface UserAppMetadata {
+  [key: string]: unknown;
+  roles?: string[];
+}
+
+async function setupAdmin(): Promise<void> {
+  const USER_EMAIL: string = 'admin@test.com';
   console.log(`กำลังค้นหา User: ${USER_EMAIL}...`);
 
   // 1. ค้นหา User
@@ -23,24 +33,24 @@ async function setupAdmin() {
     console.error('Error listing users:', listError.message);
     return;
   }
-  
+
   const user = users.find(u => u.email === USER_EMAIL);
-  
+
   if (!user) {
     console.error(`Error: ไม่พบ User ${USER_EMAIL}`);
     return;
   }
-  
+
   console.log(`พบ User ID: ${user.id}`);
 
   // --- นี่คือส่วนที่แก้ไข ---
-  
+
   // 2. ดึงข้อมูล app_metadata "ของเดิม" มาก่อน
-  const currentAppData = user.app_metadata || {};
+  const currentAppData: UserAppMetadata = user.app_metadata || {};
   console.log('Current app_metadata (เดิม):', currentAppData);
 
   // 3. สร้างข้อมูลใหม่โดยการ "รวม" ของเก่าและของใหม่
-  const newAppData = {
+  const newAppData: UserAppMetadata = {
     ...currentAppData, // ...เอาของเก่ามาทั้งหมด (เช่น provider)
     roles: ['admin']   // ...และเพิ่ม/ทับด้วย roles ที่เราต้องการ
   };
@@ -61,4 +71,7 @@ async function setupAdmin() {
   }
 }
 
-setupAdmin();
+setupAdmin().catch((error: Error) => {
+  console.error('Unexpected error:', error.message);
+  process.exit(1);
+});

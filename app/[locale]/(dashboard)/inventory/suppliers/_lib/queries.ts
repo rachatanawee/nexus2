@@ -7,7 +7,7 @@ export async function getSuppliers() {
     .from('suppliers')
     .select('*')
     .order('created_at', { ascending: false })
-  
+
   if (error) return { data: null, error }
   return { data: data as Supplier[], error: null }
 }

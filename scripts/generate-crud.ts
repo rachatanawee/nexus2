@@ -5,24 +5,35 @@ import dotenv from 'dotenv'
 
 dotenv.config({ path: '.env.local' })
 
+interface Field {
+  name: string
+  type: string
+  required: boolean
+  tsType: 'string' | 'number' | 'boolean'
+}
+
 const [,, featurePath, tableName] = process.argv
 
 if (!featurePath || !tableName) {
-  console.log('Usage: bun scripts/generate-crud-v3.js <feature-path> <table-name>')
-  console.log('Example: bun scripts/generate-crud-v3.js orders orders')
+  console.log('Usage: bun scripts/generate-crud.ts <feature-path> <table-name>')
+  console.log('Example: bun scripts/generate-crud.ts orders orders')
   process.exit(1)
 }
 
-const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1)
-const parts = featurePath.split('/')
-const featureName = parts[parts.length - 1]
-const singular = featureName.replace(/s$/, '')
-const Feature = capitalize(singular)
-const basePath = `app/[locale]/(dashboard)/${featurePath}`
+const capitalize = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1)
+const parts: string[] = featurePath.split('/')
+const featureName: string = parts[parts.length - 1]
+const singular: string = featureName.replace(/s$/, '')
+const Feature: string = capitalize(singular)
+const basePath: string = `app/[locale]/(dashboard)/${featurePath}`
 
-async function getTableSchema(tableName) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+async function getTableSchema(tableName: string): Promise<Field[]> {
+  const supabaseUrl: string | undefined = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey: string | undefined = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
 
   try {
     const response = await fetch(`${supabaseUrl}/rest/v1/?apikey=${serviceKey}`, {
@@ -36,45 +47,47 @@ async function getTableSchema(tableName) {
       throw new Error(`Table ${tableName} not found`)
     }
 
-    const excludeFields = ['id', 'created_at', 'updated_at']
-    const fields = []
+    const excludeFields: string[] = ['id', 'created_at', 'updated_at']
+    const fields: Field[] = []
 
     for (const [fieldName, fieldDef] of Object.entries(tableDef.properties)) {
       if (excludeFields.includes(fieldName)) continue
 
-      const type = fieldDef.type || 'string'
-      const format = fieldDef.format || ''
-      const required = tableDef.required?.includes(fieldName) || false
+      const fieldDefTyped = fieldDef as { type?: string; format?: string }
+      const type: string = fieldDefTyped.type || 'string'
+      const format: string = fieldDefTyped.format || ''
+      const required: boolean = tableDef.required?.includes(fieldName) || false
 
       fields.push({
         name: fieldName,
         type: format || type,
         required,
-        tsType: (format || type).includes('int') || (format || type).includes('numeric') ? 'number' : 
+        tsType: (format || type).includes('int') || (format || type).includes('numeric') ? 'number' :
                 (format || type).includes('bool') ? 'boolean' : 'string'
       })
     }
 
     return fields
   } catch (error) {
-    console.error('❌ Error fetching schema:', error.message)
+    const errorTyped = error as Error
+    console.error('❌ Error fetching schema:', errorTyped.message)
     throw error
   }
 }
 
-async function generate() {
+async function generate(): Promise<void> {
   console.log('🔍 Fetching schema from Supabase...')
-  const fields = await getTableSchema(tableName)
-  
+  const fields: Field[] = await getTableSchema(tableName)
+
   console.log('📋 Fields:', fields.map(f => f.name).join(', '))
 
-  const dirs = [basePath, `${basePath}/_components`, `${basePath}/_lib`]
-  dirs.forEach(dir => {
+  const dirs: string[] = [basePath, `${basePath}/_components`, `${basePath}/_lib`]
+  dirs.forEach((dir: string) => {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
   })
 
   // types.ts
-  const typeFields = fields.map(f => `  ${f.name}: ${f.tsType}${f.required ? '' : ' | null'}`).join('\n')
+  const typeFields: string = fields.map(f => `  ${f.name}: ${f.tsType}${f.required ? '' : ' | null'}`).join('\n')
   fs.writeFileSync(`${basePath}/_lib/types.ts`, `export type ${Feature} = {
   id: string
 ${typeFields}
@@ -97,15 +110,15 @@ export async function get${Feature}s() {
     .from('${tableName}')
     .select('*')
     .order('created_at', { ascending: false })
-  
+
   if (error) return { data: null, error }
   return { data: data as ${Feature}[], error: null }
 }
 `)
 
-  // actions.ts - Generate Zod schemas
-  const zodFields = fields.map(f => {
-    let zodType = 'z.string()'
+  // validation.ts - Shared Zod schemas
+  const zodFields: string = fields.map(f => {
+    let zodType: string = 'z.string()'
     if (f.tsType === 'number') {
       zodType = 'z.number()'
       if (f.name.toLowerCase().includes('price') || f.name.toLowerCase().includes('cost')) {
@@ -118,7 +131,7 @@ export async function get${Feature}s() {
     }
 
     if (f.required) {
-      const preprocess = f.tsType === 'number'
+      const preprocess: string = f.tsType === 'number'
         ? `z.preprocess((val) => val ? parseFloat(val as string) : undefined, ${zodType})`
         : `z.preprocess((val) => val || '', ${zodType}.min(1, '${capitalize(f.name)} is required'))`
       return `  ${f.name}: ${preprocess},`
@@ -127,7 +140,29 @@ export async function get${Feature}s() {
     }
   }).join('\n')
 
-  const rawDataFields = fields.map(f => {
+  fs.writeFileSync(`${basePath}/_lib/validation.ts`, `import { z } from 'zod'
+
+// Shared Zod schemas for ${featureName}
+export const ${singular}BaseSchema = z.object({
+${zodFields}
+})
+
+export const create${Feature}Schema = ${singular}BaseSchema
+
+export const update${Feature}Schema = ${singular}BaseSchema.extend({
+  id: z.string().min(1, 'ID is required'),
+})
+
+export const delete${Feature}Schema = z.object({
+  id: z.string().min(1, 'ID is required'),
+})
+
+export type Create${Feature}FormData = z.infer<typeof create${Feature}Schema>
+export type Update${Feature}FormData = z.infer<typeof update${Feature}Schema>
+`)
+
+  // actions.ts - Use shared validation schemas
+  const rawDataFields: string = fields.map(f => {
     if (f.tsType === 'number') {
       return `      ${f.name}: formData.get('${f.name}') ? parseFloat(formData.get('${f.name}') as string) : undefined,`
     } else if (f.tsType === 'boolean') {
@@ -137,32 +172,18 @@ export async function get${Feature}s() {
     }
   }).join('\n')
 
-  const insertData = fields.map(f => `      ${f.name}: data.${f.name}${!f.required ? ' || null' : ''}`).join(',\n')
+  const insertData: string = fields.map(f => `      ${f.name}: data.${f.name}${!f.required ? ' || null' : ''}`).join(',\n')
 
   fs.writeFileSync(`${basePath}/_lib/actions.ts`, `'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { z } from 'zod'
+import { create${Feature}Schema, update${Feature}Schema, delete${Feature}Schema } from './validation'
+import type { ZodIssue } from 'zod'
 
 type FormState = {
   success: boolean
   message: string
 }
-
-// Zod schemas for validation
-const ${singular}Schema = z.object({
-${zodFields}
-})
-
-const create${Feature}Schema = ${singular}Schema
-
-const update${Feature}Schema = ${singular}Schema.extend({
-  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
-})
-
-const delete${Feature}Schema = z.object({
-  id: z.preprocess((val) => val || '', z.string().min(1, 'ID is required')),
-})
 
 export async function create${Feature}(prevState: FormState, formData: FormData): Promise<FormState> {
   try {
@@ -173,10 +194,11 @@ export async function create${Feature}(prevState: FormState, formData: FormData)
 ${rawDataFields}
     }
 
-    // Validate data
+    // Validate data using shared Zod schema
     const validationResult = create${Feature}Schema.safeParse(rawData)
     if (!validationResult.success) {
-      return { success: false, message: validationResult.error.issues[0].message }
+      const errorMessages = validationResult.error.issues.map((err: ZodIssue) => err.message).join(', ')
+      return { success: false, message: errorMessages }
     }
 
     const data = validationResult.data
@@ -202,10 +224,11 @@ export async function update${Feature}(prevState: FormState, formData: FormData)
 ${rawDataFields}
     }
 
-    // Validate data
+    // Validate data using shared Zod schema
     const validationResult = update${Feature}Schema.safeParse(rawData)
     if (!validationResult.success) {
-      return { success: false, message: validationResult.error.issues[0].message }
+      const errorMessages = validationResult.error.issues.map((err: ZodIssue) => err.message).join(', ')
+      return { success: false, message: errorMessages }
     }
 
     const data = validationResult.data
@@ -230,10 +253,11 @@ export async function delete${Feature}(prevState: FormState, formData: FormData)
       id: formData.get('id') || undefined,
     }
 
-    // Validate data
+    // Validate data using shared Zod schema
     const validationResult = delete${Feature}Schema.safeParse(rawData)
     if (!validationResult.success) {
-      return { success: false, message: validationResult.error.issues[0].message }
+      const errorMessages = validationResult.error.issues.map((err: ZodIssue) => err.message).join(', ')
+      return { success: false, message: errorMessages }
     }
 
     const data = validationResult.data
@@ -248,7 +272,7 @@ export async function delete${Feature}(prevState: FormState, formData: FormData)
 `)
 
   // columns.tsx
-  const columnDefs = fields.slice(0, 3).map(f => `  {
+  const columnDefs: string = fields.slice(0, 3).map(f => `  {
     accessorKey: "${f.name}",
     header: ${f.name === fields[0].name ? `({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
@@ -350,9 +374,9 @@ export function ${Feature}Table({ data }: ${Feature}TableProps) {
       <div className="flex justify-end">
         <Button onClick={() => setCreateOpen(true)}>Create ${Feature}</Button>
       </div>
-      <DataTable 
-        columns={columns} 
-        data={data} 
+      <DataTable
+        columns={columns}
+        data={data}
         searchKey="${fields[0]?.name || 'name'}"
         searchPlaceholder="Search ${featureName}..."
         enableExport={true}
@@ -364,14 +388,21 @@ export function ${Feature}Table({ data }: ${Feature}TableProps) {
 }
 `)
 
-  // form-dialog.tsx
-  const formFields = fields.map(f => {
-    const inputType = f.tsType === 'number' ? 'number' : 'text'
-    const step = f.type.includes('numeric') && !f.type.includes('int') ? ' step="0.01"' : ''
-    const defaultValue = f.tsType === 'boolean' ? `{${singular}?.${f.name} ? 'true' : 'false'}` : `{${singular}?.${f.name}${!f.required ? " || ''" : ''}}`
+  // form-dialog.tsx - Use react-hook-form with shared Zod validation
+  const formFields: string = fields.map(f => {
+    const inputType: string = f.tsType === 'number' ? 'number' : 'text'
+    const step: string = f.type.includes('numeric') && !f.type.includes('int') ? ' step="0.01"' : ''
     return `            <div>
               <Label htmlFor="${f.name}">${capitalize(f.name)}${f.required ? ' *' : ''}</Label>
-              <Input id="${f.name}" name="${f.name}" type="${inputType}"${step} defaultValue=${defaultValue} ${f.required ? 'required' : ''} />
+              <Input
+                id="${f.name}"
+                type="${inputType}"${step}
+                {...register('${f.name}')}
+                className={errors.${f.name} ? 'border-red-500' : ''}
+              />
+              {errors.${f.name} && (
+                <p className="text-sm text-red-600 mt-1">{errors.${f.name}.message}</p>
+              )}
             </div>`
   }).join('\n')
 
@@ -382,10 +413,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { create${Feature}, update${Feature} } from '../_lib/actions'
-import { useActionState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { ${Feature} } from '../_lib/types'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { create${Feature}Schema, update${Feature}Schema, type Create${Feature}FormData, type Update${Feature}FormData } from '../_lib/validation'
 
 interface ${Feature}FormDialogProps {
   open: boolean
@@ -395,24 +429,50 @@ interface ${Feature}FormDialogProps {
 
 export function ${Feature}FormDialog({ open, onOpenChange, ${singular} }: ${Feature}FormDialogProps) {
   const router = useRouter()
-  const formRef = useRef<HTMLFormElement>(null)
   const isEdit = !!${singular}
-  
-  const [state, formAction, isPending] = useActionState(
-    isEdit ? update${Feature} : create${Feature},
-    { success: false, message: '' }
-  )
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
 
-  useEffect(() => {
-    if (state.success) {
-      toast.success(state.message)
-      onOpenChange(false)
-      formRef.current?.reset()
-      router.refresh()
-    } else if (state.message) {
-      toast.error(state.message)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm({
+    resolver: zodResolver(isEdit ? update${Feature}Schema : create${Feature}Schema),
+    defaultValues: {
+${fields.map(f => {
+      if (f.tsType === 'boolean') {
+        return `      ${f.name}: ${singular}?.${f.name}${!f.required ? " || undefined" : ''},`
+      } else if (f.tsType === 'number') {
+        return `      ${f.name}: ${singular}?.${f.name}${!f.required ? " || undefined" : ''},`
+      } else {
+        return `      ${f.name}: ${singular}?.${f.name}${!f.required ? " || ''" : ''},`
+      }
+    }).join('\n')}
+      ...(isEdit && { id: ${singular}.id })
     }
-  }, [state.success, state.message])
+  })
+
+  const onSubmit = async (data: Record<string, any>) => {
+    setLoading(true)
+    const formData = new FormData()
+${fields.map(f => `    if (data.${f.name} !== undefined) formData.append('${f.name}', data.${f.name}.toString())`).join('\n')}
+    if (isEdit && 'id' in data) formData.append('id', data.id)
+
+    const result = await (isEdit ? update${Feature} : create${Feature})({ success: false, message: '' }, formData)
+    setLoading(false)
+
+    if (result.success) {
+      toast.success(result.message)
+      onOpenChange(false)
+      reset()
+      router.refresh()
+    } else {
+      toast.error(result.message)
+      setMessage(result.message)
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -420,15 +480,19 @@ export function ${Feature}FormDialog({ open, onOpenChange, ${singular} }: ${Feat
         <DialogHeader>
           <DialogTitle>{isEdit ? 'Edit ${Feature}' : 'Create ${Feature}'}</DialogTitle>
         </DialogHeader>
-        <form ref={formRef} action={formAction} className="space-y-4">
-          {isEdit && <input type="hidden" name="id" value={${singular}.id} />}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
 ${formFields}
           </div>
+          {message && (
+            <p className={\`text-sm \${message.includes('success') ? 'text-green-600' : 'text-red-600'}\`}>
+              {message}
+            </p>
+          )}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Update' : 'Create')}
+            <Button type="submit" disabled={loading}>
+              {loading ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Update' : 'Create')}
             </Button>
           </div>
         </form>
