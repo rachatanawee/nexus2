@@ -272,15 +272,27 @@ export async function delete${Feature}(prevState: FormState, formData: FormData)
 `)
 
   // columns.tsx
-  const columnDefs: string = fields.slice(0, 3).map(f => `  {
-    accessorKey: "${f.name}",
-    header: ${f.name === fields[0].name ? `({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+  const columnDefs: string = fields.slice(0, 3).map(f => {
+    const isFirst = f.name === fields[0].name
+    const header = isFirst ? `({ column }) => (
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="font-bold">
         ${capitalize(f.name)}
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
-    )` : `"${capitalize(f.name)}"`},
-  }`).join(',\n')
+    )` : `() => <div className="font-bold">${capitalize(f.name)}</div>`
+
+    const meta = isFirst ? `,
+    meta: {
+      label: "${capitalize(f.name)}",
+      variant: "text",
+      placeholder: "Search ${featureName}...",
+    }` : ''
+
+    return `  {
+    accessorKey: "${f.name}",
+    header: ${header}${meta},
+  }`
+  }).join(',\n')
 
   fs.writeFileSync(`${basePath}/_components/columns.tsx`, `"use client"
 
@@ -301,7 +313,7 @@ ${columnDefs},
   {
     accessorKey: "created_at",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="font-bold">
         Created
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
@@ -314,7 +326,7 @@ ${columnDefs},
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="font-bold">Actions</div>,
     cell: function ActionsCell({ row }) {
       const router = useRouter()
       const [editOpen, setEditOpen] = useState(false)
@@ -355,33 +367,62 @@ ${columnDefs},
   // table.tsx
   fs.writeFileSync(`${basePath}/_components/${singular}-table.tsx`, `"use client"
 
-import { ${Feature} } from "../_lib/types"
-import { DataTable } from "@/components/ui/data-table"
-import { columns } from "./columns"
-import { Button } from "@/components/ui/button"
+import {
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
 import { useState } from "react"
+
+import { DataTable } from "@/components/tablecn/data-table/data-table"
+import { DataTableToolbar } from "@/components/tablecn/data-table/data-table-toolbar"
+import { Button } from "@/components/ui/button"
+import { ${Feature} } from "../_lib/types"
 import { ${Feature}FormDialog } from "./${singular}-form-dialog"
+import { columns } from "./columns"
 
 interface ${Feature}TableProps {
   data: ${Feature}[]
 }
 
 export function ${Feature}Table({ data }: ${Feature}TableProps) {
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState({})
   const [createOpen, setCreateOpen] = useState(false)
+
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  })
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={() => setCreateOpen(true)}>Create ${Feature}</Button>
-      </div>
-      <DataTable
-        columns={columns}
-        data={data}
-        searchKey="${fields[0]?.name || 'name'}"
-        searchPlaceholder="Search ${featureName}..."
-        enableExport={true}
-        exportFilename="${featureName}"
-      />
+      <DataTable table={table}>
+        <DataTableToolbar table={table}>
+          <Button onClick={() => setCreateOpen(true)}>Create ${Feature}</Button>
+        </DataTableToolbar>
+      </DataTable>
       <${Feature}FormDialog open={createOpen} onOpenChange={setCreateOpen} ${singular}={null} />
     </div>
   )

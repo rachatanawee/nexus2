@@ -16,24 +16,29 @@ export const columns: ColumnDef<Categorie>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="font-bold">
         Name
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
+    meta: {
+      label: "Name",
+      variant: "text",
+      placeholder: "Search categories...",
+    },
   },
   {
     accessorKey: "description",
-    header: "Description",
+    header: () => <div className="font-bold">Description</div>,
   },
   {
     accessorKey: "icon",
-    header: "Icon",
+    header: () => <div className="font-bold">Icon</div>,
   },
   {
     accessorKey: "created_at",
     header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="font-bold">
         Created
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
@@ -46,7 +51,7 @@ export const columns: ColumnDef<Categorie>[] = [
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="font-bold">Actions</div>,
     cell: function ActionsCell({ row }) {
       const router = useRouter()
       const [editOpen, setEditOpen] = useState(false)
