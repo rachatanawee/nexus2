@@ -24,11 +24,28 @@ export function FormDataTable({ data, schema }: FormDataTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
   const [viewData, setViewData] = useState<FormSubmission | null>(null)
   const [editData, setEditData] = useState<FormSubmission | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const { settings } = usePreferences()
   const router = useRouter()
   
   // Get first 3 fields for columns
   const displayFields = schema.schema.fields.slice(0, 3)
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this submission?')) return
+    setDeletingId(id)
+    const formData = new FormData()
+    formData.append('id', id)
+    const result = await deleteFormData({ success: false, message: '' }, formData)
+    setDeletingId(null)
+
+    if (result.success) {
+      toast.success(result.message)
+      router.refresh()
+    } else {
+      toast.error(result.message)
+    }
+  }
 
   const columns: ColumnDef<FormSubmission>[] = [
     {
@@ -62,52 +79,32 @@ export function FormDataTable({ data, schema }: FormDataTableProps) {
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => {
-        const [deleting, setDeleting] = useState(false)
-
-        const handleDelete = async () => {
-          if (!confirm('Delete this submission?')) return
-          setDeleting(true)
-          const formData = new FormData()
-          formData.append('id', row.original.id)
-          const result = await deleteFormData({ success: false, message: '' }, formData)
-          setDeleting(false)
-
-          if (result.success) {
-            toast.success(result.message)
-            router.refresh()
-          } else {
-            toast.error(result.message)
-          }
-        }
-
-        return (
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setViewData(row.original)}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setEditData(row.original)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        )
-      },
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setViewData(row.original)}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setEditData(row.original)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleDelete(row.original.id)}
+            disabled={deletingId === row.original.id}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
     },
   ]
 

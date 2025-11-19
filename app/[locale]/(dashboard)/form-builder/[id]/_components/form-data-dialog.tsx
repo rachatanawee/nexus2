@@ -95,10 +95,10 @@ export function FormDataDialog({ open, onOpenChange, schema, submission }: FormD
     }
   }, [submission, reset])
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: Record<string, unknown>) => {
     setLoading(true)
     try {
-      const processedData: Record<string, any> = {}
+      const processedData: Record<string, unknown> = {}
       schema.schema.fields.forEach(field => {
         let value = data[field.name]
         

@@ -76,12 +76,12 @@ export function DynamicForm({ schema }: DynamicFormProps) {
     resolver: zodResolver(zodSchema)
   })
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: Record<string, unknown>) => {
     try {
       const supabase = createClient()
       
       // Convert form data to match database types
-      const processedData: Record<string, any> = {}
+      const processedData: Record<string, unknown> = {}
       schema.schema.fields.forEach(field => {
         let value = data[field.name]
         
