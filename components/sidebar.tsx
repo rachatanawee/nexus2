@@ -1,6 +1,6 @@
 'use client'
 
-import { LayoutDashboard, Users, Settings, LogOut, ChevronLeft, ChevronRight, Languages, Package, ChevronDown, User } from 'lucide-react'
+import { LayoutDashboard, Users, Settings, LogOut, ChevronLeft, ChevronRight, Languages, Package, ChevronDown, User, FileText } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { logout } from '@/lib/actions/auth'
 import { Button } from './ui/button'
@@ -72,6 +72,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <Link href={`/${locale}/users`} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname === `/${locale}/users` ? 'bg-primary text-primary-foreground rounded-lg' : 'rounded-lg hover:bg-accent/50'} ${collapsed ? 'justify-center' : ''}`}>
             <Users className="h-5 w-5" />
             {!collapsed && t('users')}
+          </Link>
+        )}
+        {userIsAdmin && (
+          <Link href={`/${locale}/form-builder`} className={`flex items-center gap-3 px-3 py-2 text-sm font-medium transition-all duration-200 ${pathname.includes(`/${locale}/form-builder`) ? 'bg-primary text-primary-foreground rounded-lg' : 'rounded-lg hover:bg-accent/50'} ${collapsed ? 'justify-center' : ''}`}>
+            <FileText className="h-5 w-5" />
+            {!collapsed && 'Form Builder'}
           </Link>
         )}
         <div>

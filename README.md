@@ -24,6 +24,7 @@ Production-ready Next.js boilerplate with Supabase authentication, role-based ac
 - ✅ **PDF Reports** - React-PDF with shared components
 - ✅ **Testing Suite** - Jest + React Testing Library + Playwright
 - ✅ **Form Validation** - Zod schemas with type safety
+- ✅ **Form Builder** - Dynamic forms with JSON schema storage
 - ✅ **shadcn/ui Components**
 - ✅ **Tailwind CSS**
 - ✅ **Feature-Colocation** - Monolith architecture pattern
@@ -230,6 +231,13 @@ See [PERMISSIONS.md](PERMISSIONS.md) for details.
 - Click language button in sidebar (EN/ไทย)
 - Or navigate to `/en/*` or `/th/*`
 
+### Form Builder (Admin Only)
+- **Overview:** `/en/form-builder`
+- **Create Forms:** JSON schema-based form definitions
+- **Dynamic Forms:** Auto-generated forms from schema
+- **Data Management:** CRUD operations on form submissions
+- **Role-based Access:** Admin create/edit, Manager view/create, User view only
+
 ### Dashboard Features
 - **Collapsible Sidebar** - Click chevron to collapse
 - **Submenu** - Click Inventory to expand/collapse
@@ -237,6 +245,7 @@ See [PERMISSIONS.md](PERMISSIONS.md) for details.
 - **Language Switcher** - Switch between EN/TH
 - **Profile Access** - User profile and preferences
 - **Settings Access** - App settings (admin only)
+- **Form Builder** - Dynamic form creation (admin only)
 - **Logout** - Secure logout with session cleanup
 
 ## CRUD Generator
@@ -304,6 +313,89 @@ bun scripts/generate-crud.js inventory/suppliers suppliers
 ```
 
 See [docs/CRUD-GENERATOR.md](docs/CRUD-GENERATOR.md) for detailed guide.
+
+## Form Builder
+
+Create dynamic forms using JSON schemas with full CRUD capabilities.
+
+### Quick Start
+
+```bash
+# 1. Run database setup
+# Copy and run db/form_builder.sql in Supabase SQL Editor
+
+# 2. Access Form Builder (Admin only)
+# Navigate to /en/form-builder
+```
+
+### Features
+
+- ✅ **JSON Schema Storage** - Define forms using JSON
+- ✅ **Dynamic Form Generation** - Auto-generate forms from schema
+- ✅ **Field Types** - text, number, textarea, select, checkbox, date
+- ✅ **Validation** - Required fields, min/max length, patterns
+- ✅ **Data Management** - Full CRUD on form submissions
+- ✅ **Role-based Access** - Admin/Manager/User permissions
+- ✅ **React Hook Form** - Client-side validation with Zod
+
+### Schema Example
+
+```json
+{
+  "fields": [
+    {
+      "name": "name",
+      "type": "text",
+      "label": "Product Name",
+      "required": true,
+      "validation": {
+        "minLength": 1,
+        "maxLength": 100
+      }
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "label": "Price",
+      "required": true,
+      "validation": {
+        "min": 0,
+        "step": 0.01
+      }
+    },
+    {
+      "name": "category",
+      "type": "select",
+      "label": "Category",
+      "required": true,
+      "options": [
+        {"value": "electronics", "label": "Electronics"},
+        {"value": "clothing", "label": "Clothing"}
+      ]
+    }
+  ]
+}
+```
+
+### Usage
+
+1. **Create Schema** - Define form structure using JSON
+2. **Generate Form** - System creates dynamic form from schema
+3. **Collect Data** - Users submit data through generated form
+4. **Manage Data** - View, edit, delete form submissions
+
+### Data Storage
+
+- **Form Schemas** - Stored in `_form_schemas` table
+- **Form Submissions** - Stored as JSON in `_form_data` table
+- **Flexible Structure** - No need to create separate tables
+- **Queryable** - Use JSONB queries for advanced filtering
+
+### Permissions
+
+- **Admin** - Full access (create, edit, delete schemas and data)
+- **Manager** - View and create schemas, manage data
+- **User** - View schemas, submit and manage own data
 
 ## Testing
 
@@ -509,7 +601,7 @@ See [docs/APP-SETTINGS.md](docs/APP-SETTINGS.md) for details.
 - **Organized Structure** - System tables use `_` prefix
 - **Clear Separation** - System vs business data
 - **Security** - Proper RLS policies
-- **Examples:** `_app_settings`, `_user_preferences`
+- **Examples:** `_app_settings`, `_user_preferences`, `_form_schemas`, `_form_data`
 
 See [docs/SYSTEM-TABLES.md](docs/SYSTEM-TABLES.md) for details.
 
