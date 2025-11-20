@@ -299,7 +299,7 @@ export async function delete${Feature}(prevState: FormState, formData: FormData)
 import { ColumnDef } from "@tanstack/react-table"
 import { ${Feature} } from "../_lib/types"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, Trash2, Pencil } from "lucide-react"
+import { ArrowUpDown, Trash2, Pencil, Copy } from "lucide-react"
 import { delete${Feature} } from "../_lib/actions"
 import { toast } from "sonner"
 import { useState } from "react"
@@ -326,10 +326,13 @@ ${columnDefs},
   },
   {
     id: "actions",
-    header: () => <div className="font-bold">Actions</div>,
+    header: () => <div className="font-bold text-center">Actions</div>,
+    size: 100,
+    enableResizing: false,
     cell: function ActionsCell({ row }) {
       const router = useRouter()
       const [editOpen, setEditOpen] = useState(false)
+      const [duplicateOpen, setDuplicateOpen] = useState(false)
       const [deleting, setDeleting] = useState(false)
 
       const handleDelete = async () => {
@@ -348,15 +351,27 @@ ${columnDefs},
         }
       }
 
+      const duplicateData = {
+        ...row.original,
+        ${fields[0]?.name || 'name'}: \`\${row.original.${fields[0]?.name || 'name'}} (Copy)\`,
+        id: undefined,
+        created_at: undefined,
+        updated_at: undefined,
+      }
+
       return (
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-            <Pencil className="h-4 w-4" />
+        <div className="flex gap-0.5 justify-center">
+          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-blue-50" onClick={() => setEditOpen(true)}>
+            <Pencil className="h-3 w-3 text-blue-600" />
           </Button>
-          <Button variant="outline" size="sm" onClick={handleDelete} disabled={deleting}>
-            <Trash2 className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-green-50" onClick={() => setDuplicateOpen(true)}>
+            <Copy className="h-3 w-3 text-green-600" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-red-50" onClick={handleDelete} disabled={deleting}>
+            <Trash2 className="h-3 w-3 text-red-600" />
           </Button>
           <${Feature}FormDialog open={editOpen} onOpenChange={setEditOpen} ${singular}={row.original} />
+          <${Feature}FormDialog open={duplicateOpen} onOpenChange={setDuplicateOpen} ${singular}={duplicateData as ${Feature}} />
         </div>
       )
     },
@@ -369,6 +384,7 @@ ${columnDefs},
 
 import {
   ColumnFiltersState,
+  ColumnSizingState,
   SortingState,
   VisibilityState,
   getCoreRowModel,
@@ -394,6 +410,7 @@ export function ${Feature}Table({ data }: ${Feature}TableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [createOpen, setCreateOpen] = useState(false)
 
@@ -408,10 +425,13 @@ export function ${Feature}Table({ data }: ${Feature}TableProps) {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onColumnSizingChange: setColumnSizing,
+    columnResizeMode: "onChange",
     state: {
       sorting,
       columnFilters,
       columnVisibility,
+      columnSizing,
       rowSelection,
     },
   })

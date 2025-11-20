@@ -40,9 +40,10 @@ export function DataTable<TData>({
                   <TableHead
                     key={header.id}
                     colSpan={header.colSpan}
-                    className="border-r"
+                    className="border-r relative"
                     style={{
                       ...getCommonPinningStyles({ column: header.column }),
+                      width: header.getSize(),
                     }}
                   >
                     {header.isPlaceholder
@@ -51,6 +52,16 @@ export function DataTable<TData>({
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
+                    {header.column.getCanResize() && (
+                      <div
+                        onMouseDown={header.getResizeHandler()}
+                        onTouchStart={header.getResizeHandler()}
+                        className={cn(
+                          "absolute right-0 top-0 h-full w-1 cursor-col-resize select-none touch-none bg-border opacity-0 hover:opacity-100",
+                          header.column.getIsResizing() && "opacity-100 bg-primary"
+                        )}
+                      />
+                    )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -70,6 +81,7 @@ export function DataTable<TData>({
                       className="!bg-white group-hover:!bg-gray-50 border-r transition-colors"
                       style={{
                         ...getCommonPinningStyles({ column: cell.column }),
+                        width: cell.column.getSize(),
                       }}
                     >
                       {flexRender(

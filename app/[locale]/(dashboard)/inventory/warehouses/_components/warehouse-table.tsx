@@ -2,6 +2,7 @@
 
 import {
   ColumnFiltersState,
+  ColumnSizingState,
   SortingState,
   VisibilityState,
   getCoreRowModel,
@@ -27,6 +28,7 @@ export function WarehouseTable({ data }: WarehouseTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [createOpen, setCreateOpen] = useState(false)
 
@@ -41,10 +43,13 @@ export function WarehouseTable({ data }: WarehouseTableProps) {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onColumnSizingChange: setColumnSizing,
+    columnResizeMode: "onChange",
     state: {
       sorting,
       columnFilters,
       columnVisibility,
+      columnSizing,
       rowSelection,
     },
   })

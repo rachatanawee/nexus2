@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Categorie } from "../_lib/types"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, Trash2, Pencil } from "lucide-react"
+import { ArrowUpDown, Trash2, Pencil, Copy } from "lucide-react"
 import { deleteCategorie } from "../_lib/actions"
 import { toast } from "sonner"
 import { useState } from "react"
@@ -51,10 +51,13 @@ export const columns: ColumnDef<Categorie>[] = [
   },
   {
     id: "actions",
-    header: () => <div className="font-bold">Actions</div>,
+    header: () => <div className="font-bold text-center">Actions</div>,
+    size: 100,
+    enableResizing: false,
     cell: function ActionsCell({ row }) {
       const router = useRouter()
       const [editOpen, setEditOpen] = useState(false)
+      const [duplicateOpen, setDuplicateOpen] = useState(false)
       const [deleting, setDeleting] = useState(false)
 
       const handleDelete = async () => {
@@ -73,15 +76,27 @@ export const columns: ColumnDef<Categorie>[] = [
         }
       }
 
+      const duplicateData = {
+        ...row.original,
+        name: `${row.original.name} (Copy)`,
+        id: undefined,
+        created_at: undefined,
+        updated_at: undefined,
+      }
+
       return (
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-            <Pencil className="h-4 w-4" />
+        <div className="flex gap-0.5 justify-center">
+          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-blue-50" onClick={() => setEditOpen(true)}>
+            <Pencil className="h-3 w-3 text-blue-600" />
           </Button>
-          <Button variant="outline" size="sm" onClick={handleDelete} disabled={deleting}>
-            <Trash2 className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-green-50" onClick={() => setDuplicateOpen(true)}>
+            <Copy className="h-3 w-3 text-green-600" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-red-50" onClick={handleDelete} disabled={deleting}>
+            <Trash2 className="h-3 w-3 text-red-600" />
           </Button>
           <CategorieFormDialog open={editOpen} onOpenChange={setEditOpen} categorie={row.original} />
+          <CategorieFormDialog open={duplicateOpen} onOpenChange={setDuplicateOpen} categorie={duplicateData as Categorie} />
         </div>
       )
     },

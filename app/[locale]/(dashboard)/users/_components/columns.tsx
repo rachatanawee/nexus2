@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { User } from "../_lib/types"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, Trash2 } from "lucide-react"
+import { ArrowUpDown, Trash2, Users } from "lucide-react"
 import { RoleDialog } from "./role-dialog"
 import { deleteUser } from "../_lib/actions"
 import { toast } from "sonner"
@@ -26,6 +26,11 @@ export const columns: ColumnDef<User>[] = [
         </Button>
       )
     },
+    meta: {
+      variant: "text",
+      label: "Email",
+      placeholder: "Filter emails...",
+    },
   },
   {
     accessorKey: "roles",
@@ -33,6 +38,18 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const roles = row.original.roles
       return roles.length > 0 ? roles.join(", ") : "No roles"
+    },
+    filterFn: (row, id, value) => {
+      return row.original.roles.some(role => role.toLowerCase().includes(value.toLowerCase()))
+    },
+    meta: {
+      variant: "multiSelect",
+      label: "Roles",
+      options: [
+        { label: "Admin", value: "admin" },
+        { label: "Manager", value: "manager" },
+        { label: "User", value: "user" },
+      ],
     },
   },
   {
@@ -56,7 +73,9 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     id: "actions",
-    header: "Actions",
+    header: () => <div className="text-center">Actions</div>,
+    size: 120,
+    enableResizing: false,
     cell: function ActionsCell({ row }) {
       const router = useRouter()
       const [open, setOpen] = useState(false)
@@ -79,17 +98,19 @@ export const columns: ColumnDef<User>[] = [
       }
 
       return (
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-            Manage Roles
+        <div className="flex gap-0.5 justify-center">
+          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-blue-50" onClick={() => setOpen(true)} title="Manage Roles">
+            <Users className="h-3 w-3 text-blue-600" />
           </Button>
           <Button
-            variant="outline"
-            size="sm"
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 hover:bg-red-50"
             onClick={handleDelete}
             disabled={deleting}
+            title="Delete User"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3 w-3 text-red-600" />
           </Button>
           <RoleDialog open={open} onOpenChange={setOpen} user={row.original} />
         </div>
