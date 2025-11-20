@@ -40,6 +40,7 @@ export function DataTable<TData>({
                   <TableHead
                     key={header.id}
                     colSpan={header.colSpan}
+                    className="border-r"
                     style={{
                       ...getCommonPinningStyles({ column: header.column }),
                     }}
@@ -55,16 +56,18 @@ export function DataTable<TData>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="bg-white">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="!bg-white hover:!bg-gray-50"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
+                      className="!bg-white border-r"
                       style={{
                         ...getCommonPinningStyles({ column: cell.column }),
                       }}

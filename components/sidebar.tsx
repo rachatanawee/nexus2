@@ -51,7 +51,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const settings = useSettings()
 
   return (
-    <div className={`fixed left-0 top-0 flex h-screen flex-col border-r transition-all duration-300 ease-in-out z-50 ${collapsed ? 'w-16' : 'w-64'}`} style={{ backgroundColor: 'var(--sidebar)' }}>
+    <div className={`fixed left-0 top-0 flex h-screen flex-col border-r transition-all duration-300 ease-in-out z-50 ${collapsed ? 'w-16' : 'w-56'}`} style={{ backgroundColor: 'var(--sidebar)' }}>
       <div className="flex items-center justify-between border-b p-4">
         {!collapsed && (
           <div className="flex items-center gap-2">

@@ -33,13 +33,13 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
   } = useForm({
     resolver: zodResolver(isEdit ? updateProductSchema : createProductSchema),
     defaultValues: {
-      name: product?.name || '',
-      sku: product?.sku || '',
+      name: product?.name,
+      sku: product?.sku,
       description: product?.description || '',
       category_id: product?.category_id || '',
-      price: product?.price || undefined,
-      cost: product?.cost || undefined,
-      stock_quantity: product?.stock_quantity || undefined,
+      price: product?.price,
+      cost: product?.cost,
+      stock_quantity: product?.stock_quantity,
       min_stock_level: product?.min_stock_level || undefined,
       image_url: product?.image_url || '',
       is_active: product?.is_active || undefined,
