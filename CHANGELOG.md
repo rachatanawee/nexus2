@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-20
+
+### Added
+- tablecn DataTable implementation from [sadmann7/tablecn](https://github.com/sadmann7/tablecn)
+- White background styling for all data tables
+- Column borders and hover effects on table rows
+- Testing suite with Jest + React Testing Library + Playwright
+- Comprehensive testing documentation (TESTING.md)
+- Zod validation system for forms
+- Validation documentation (VALIDATION.md)
+- Form Builder feature with JSON schema storage
+- Dynamic form generation from schemas
+- React Hook Form integration with Zod resolver
+- Client and server-side validation patterns
+
+### Changed
+- Migrated all tables to use tablecn DataTable
+- Updated form-builder to use tablecn components
+- Reduced sidebar width from 256px to 224px
+- Improved table cell styling with proper background inheritance
+- Enhanced hover states with smooth transitions
+- Updated README with tablecn reference and testing info
+- Updated CONTRIBUTING.md with DataTable and validation guidelines
+
+### Fixed
+- ESLint errors with 'any' types in form-data-dialog
+- Table row backgrounds not displaying white correctly
+- Cell backgrounds overriding row hover states
+- Form validation type safety issues
+
 ## [0.4.1] - 2026-11-17
 
 ### Added
@@ -29,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Table headers not freezing on scroll
 - Settings fields reordering randomly
 
-## [0.4.0] - 2026-01-17
+## [0.4.0] - 2025-01-17
 
 ### Added
 - Modern DataTable with TanStack Table v8

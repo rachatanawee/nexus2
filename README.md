@@ -11,11 +11,11 @@ Production-ready Next.js boilerplate with Supabase authentication, role-based ac
 - ✅ **Route Guards** (Middleware protection)
 - ✅ **Admin Dashboard** with collapsible sidebar & submenu
 - ✅ **User Management** - Full CRUD with role assignment
-- ✅ **DataTable** - TanStack Table v8 with advanced features
-  - Column sorting, resizing, visibility toggle
-  - Sticky headers, row selection, faceted filters
-  - Search with reset, export to Excel
-  - Advanced pagination (page size, first/last)
+- ✅ **DataTable** - [tablecn](https://github.com/sadmann7/tablecn) with TanStack Table v8
+  - Column sorting, filtering, visibility toggle
+  - Row selection, pagination
+  - Customizable styling with white background
+  - Column borders and hover effects
 - ✅ **CRUD Generator** - Auto-generate from Supabase schema
 - ✅ **App Settings & User Preferences** - Configurable system
 - ✅ **Format System** - Number/Date formatting with caching
@@ -149,7 +149,11 @@ app/[locale]/(dashboard)/
 
 components/
 ├── ui/                     # shadcn/ui components
-│   └── data-table.tsx      # TanStack Table v8 wrapper
+├── tablecn/                # tablecn data table components
+│   └── data-table/
+│       ├── data-table.tsx
+│       ├── data-table-toolbar.tsx
+│       └── data-table-pagination.tsx
 ├── sidebar.tsx             # Collapsible sidebar with submenu
 └── dashboard-layout.tsx    # Dashboard wrapper
 
@@ -278,7 +282,7 @@ The script automatically creates:
 - ✅ **Queries** - Server-side data fetching
 - ✅ **Actions** - Create & delete server actions
 - ✅ **Columns** - Column definitions with sorting and formatting
-- ✅ **Table Component** - Using modern DataTable with all features
+- ✅ **Table Component** - Using tablecn DataTable with all features
 - ✅ **Create Dialog** - Form with all fields
 - ✅ **Page** - Complete route with auth guard
 

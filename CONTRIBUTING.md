@@ -155,12 +155,109 @@ export async function createProduct(formData: FormData) {
 }
 ```
 
+## DataTable Guidelines
+
+### Using tablecn DataTable
+We use [tablecn](https://github.com/sadmann7/tablecn) for all data tables:
+
+```typescript
+import { DataTable } from "@/components/tablecn/data-table/data-table"
+import { DataTableToolbar } from "@/components/tablecn/data-table/data-table-toolbar"
+import { useReactTable, getCoreRowModel } from "@tanstack/react-table"
+
+export function MyTable({ data }: { data: MyType[] }) {
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  })
+
+  return (
+    <DataTable table={table}>
+      <DataTableToolbar table={table}>
+        <Button>Create</Button>
+      </DataTableToolbar>
+    </DataTable>
+  )
+}
+```
+
+### Column Definitions
+Define columns with proper typing:
+```typescript
+import { ColumnDef } from "@tanstack/react-table"
+import { ArrowUpDown } from "lucide-react"
+
+const columns: ColumnDef<MyType>[] = [
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <Button variant="ghost" onClick={() => column.toggleSorting()}>
+        Name <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+  },
+]
+```
+
+## Form Validation
+
+### Using Zod Schemas
+All forms must use Zod for validation:
+
+```typescript
+// lib/validations/product.ts
+import { z } from 'zod'
+
+export const createProductSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  price: z.coerce.number().min(0, 'Price must be positive'),
+})
+
+export type CreateProductInput = z.infer<typeof createProductSchema>
+```
+
+### Server Action Validation
+```typescript
+export async function createProduct(formData: FormData) {
+  const validatedFields = createProductSchema.safeParse({
+    name: formData.get('name'),
+    price: formData.get('price'),
+  })
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+    }
+  }
+
+  const { name, price } = validatedFields.data
+  // Process validated data
+}
+```
+
+### Client-Side Validation
+```typescript
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+export function ProductForm() {
+  const form = useForm<CreateProductInput>({
+    resolver: zodResolver(createProductSchema),
+  })
+
+  return <Form {...form}>...</Form>
+}
+```
+
 ## Testing
 
-### Unit Tests
+### Unit Tests (Jest)
 Test utility functions and components:
 ```typescript
-// __tests__/permissions.test.ts
+// __tests__/lib/permissions.test.ts
 import { isAdmin } from '@/lib/permissions'
 
 describe('Permissions', () => {
@@ -171,16 +268,46 @@ describe('Permissions', () => {
 })
 ```
 
-### Integration Tests
-Test API endpoints and user flows:
+### Component Tests
 ```typescript
-// __tests__/api/users.test.ts
-describe('/api/users', () => {
-  it('should require admin access', async () => {
-    const response = await request('/api/users', { user: normalUser })
-    expect(response.status).toBe(403)
+// __tests__/components/sidebar.test.tsx
+import { render, screen } from '@testing-library/react'
+import { Sidebar } from '@/components/sidebar'
+
+describe('Sidebar', () => {
+  it('renders navigation items', () => {
+    render(<Sidebar collapsed={false} />)
+    expect(screen.getByText('Dashboard')).toBeInTheDocument()
   })
 })
+```
+
+### E2E Tests (Playwright)
+Test critical user flows:
+```typescript
+// e2e/auth.spec.ts
+import { test, expect } from '@playwright/test'
+
+test('user can login', async ({ page }) => {
+  await page.goto('/en/login')
+  await page.fill('[name="email"]', 'admin@example.com')
+  await page.fill('[name="password"]', 'password')
+  await page.click('button[type="submit"]')
+  
+  await expect(page).toHaveURL('/en/dashboard')
+})
+```
+
+### Running Tests
+```bash
+# Unit tests
+bun test
+bun test:watch
+bun test:coverage
+
+# E2E tests
+bun test:e2e
+bun test:e2e:ui
 ```
 
 ## Git Workflow
