@@ -72,7 +72,7 @@ export function FormDataTable({ data, schema }: FormDataTableProps) {
         </Button>
       ),
       cell: ({ row }) => {
-        const dateFormat = settings?.date_format || 'MM/dd/yyyy'
+        const dateFormat = settings?.date_format || 'dd-MM-yyyy'
         return formatSystemDate(new Date(row.original.created_at), dateFormat)
       },
     },
@@ -134,7 +134,7 @@ export function FormDataTable({ data, schema }: FormDataTableProps) {
                   <strong>ID:</strong> {viewData.id}
                 </div>
                 <div>
-                  <strong>Submitted:</strong> {formatSystemDate(new Date(viewData.created_at), settings?.date_format || 'MM/dd/yyyy')}
+                  <strong>Submitted:</strong> {formatSystemDate(new Date(viewData.created_at), settings?.date_format || 'dd-MM-yyyy')}
                 </div>
               </div>
               <div>

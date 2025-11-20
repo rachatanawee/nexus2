@@ -3,7 +3,7 @@
 ## Development Setup
 
 ### Prerequisites
-- Node.js 18+ or Bun
+- Node.js 20+ or Bun
 - Supabase account
 - Git
 

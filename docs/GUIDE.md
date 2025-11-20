@@ -75,7 +75,7 @@ formatSystemNumber(1234.56, settings) // "1,234.56"
 
 // Format dates
 import { formatSystemDate } from '@/lib/format-utils'
-formatSystemDate(new Date(), 'MM/dd/yyyy') // "12/25/2024"
+formatSystemDate(new Date(), 'dd-MM-yyyy') // "12/25/2024"
 
 // Use cached preferences
 const { settings, refreshSettings } = usePreferences()

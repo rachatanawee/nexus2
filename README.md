@@ -303,7 +303,7 @@ The script automatically creates:
 ### Format Integration
 Generated tables automatically use system format preferences:
 - **Number Formatting** - Locale, decimals, thousands separator
-- **Date Formatting** - MM/dd/yyyy, dd/MM/yyyy, yyyy-MM-dd
+- **Date Formatting** - dd-MM-yyyy, dd/MM/yyyy, yyyy-MM-dd
 - **Caching** - Preferences cached for performance
 
 ### Example: Inventory System
@@ -632,8 +632,8 @@ See [docs/SYSTEM-TABLES.md](docs/SYSTEM-TABLES.md) for details.
 - [docs/CODING-STANDARDS.md](docs/CODING-STANDARDS.md) - Code style guide
 - [docs/DOCKER-DEPLOYMENT.md](docs/DOCKER-DEPLOYMENT.md) - Docker deployment
 - [docs/SETUP-ADMIN.md](docs/SETUP-ADMIN.md) - Admin setup guide
-- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - Contributing guidelines
-- [docs/CHANGELOG.md](docs/CHANGELOG.md) - Version history
+- [docs/CONTRIBUTING.md](/CONTRIBUTING.md) - Contributing guidelines
+- [docs/CHANGELOG.md](/CHANGELOG.md) - Version history
 - [Supabase Docs](https://supabase.com/docs)
 - [Next.js Docs](https://nextjs.org/docs)
 

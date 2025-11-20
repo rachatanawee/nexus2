@@ -71,7 +71,7 @@ INSERT INTO _app_settings (key, value, category, type, description) VALUES
 ('number_decimal_places', '2', 'preferences', 'number', 'Default decimal places for numbers'),
 ('number_thousands_separator', 'true', 'preferences', 'select', 'Use thousands separator (true/false)'),
 ('currency_format', 'USD', 'preferences', 'select', 'Default currency format (USD, THB, EUR)'),
-('date_format', 'MM/dd/yyyy', 'preferences', 'select', 'Date format (MM/dd/yyyy, dd/MM/yyyy, yyyy-MM-dd)'),
+('date_format', 'dd-MM-yyyy', 'preferences', 'select', 'Date format (dd-MM-yyyy, dd/MM/yyyy, yyyy-MM-dd)'),
 ('timezone', 'Asia/Bangkok', 'preferences', 'text', 'Default timezone')
 
 ON CONFLICT (key) DO NOTHING;

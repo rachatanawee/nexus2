@@ -111,7 +111,7 @@ export function useFormatSettings() {
 ### Format Functions
 ```typescript
 export function formatDate(date: Date, settings?: any) {
-  const dateFormat = settings?.date_format || 'MM/dd/yyyy' // Always provide fallback
+  const dateFormat = settings?.date_format || 'dd-MM-yyyy' // Always provide fallback
   return formatSystemDate(date, dateFormat)
 }
 ```

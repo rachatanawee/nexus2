@@ -45,7 +45,7 @@ export const columns: ColumnDef<Warehouse>[] = [
     ),
     cell: function DateCell({ row }) {
       const { settings } = usePreferences()
-      const dateFormat = settings?.date_format || 'MM/dd/yyyy'
+      const dateFormat = settings?.date_format || 'dd-MM-yyyy'
       return formatSystemDate(new Date(row.original.created_at), dateFormat)
     },
   },

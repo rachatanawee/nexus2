@@ -14,6 +14,6 @@ export function formatNumber(value: number, settings?: any) {
 
 export function formatDate(date: Date, settings?: any) {
   // Use fallback if date_format is not available
-  const dateFormat = settings?.date_format || 'MM/dd/yyyy'
+  const dateFormat = settings?.date_format || 'dd-MM-yyyy'
   return formatSystemDate(date, dateFormat)
 }

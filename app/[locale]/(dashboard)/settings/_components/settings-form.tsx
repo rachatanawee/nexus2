@@ -183,7 +183,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="MM/dd/yyyy">MM/dd/yyyy</SelectItem>
+                <SelectItem value="dd-MM-yyyy">dd-MM-yyyy</SelectItem>
                 <SelectItem value="dd/MM/yyyy">dd/MM/yyyy</SelectItem>
                 <SelectItem value="yyyy-MM-dd">yyyy-MM-dd</SelectItem>
               </SelectContent>
