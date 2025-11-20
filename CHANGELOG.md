@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-01-18
+
+### Added
+- Column resizing functionality for all tables
+- Compact action buttons with colored icons (blue/green/red/purple)
+- Duplicate row action for all CRUD tables
+- User PDF report generation with export button
+- User table filters (email and roles)
+- Form Builder feature with JSON schema storage
+- Form Builder table with filters and colored actions
+- Form data submissions with CRUD operations
+- Dynamic form generation from JSON schemas
+- Form data filters for all columns
+- White background styling for form builder pages
+- Tooltips on all action buttons
+
+### Changed
+- Action column width reduced to 100-130px
+- Button size reduced to h-6 w-6 with h-3 w-3 icons
+- Gap between buttons reduced to gap-0.5
+- Button variant changed from outline to ghost
+- CRUD generator updated with colored icons and duplicate action
+- Users table actions updated to match categories style
+- Form builder tables migrated to tablecn components
+- All tables now use consistent colored icon scheme
+
+### Fixed
+- React Hook useState error in table cell functions
+- Missing imports for CreateUserDialog and Users icon
+- ESLint 'any' type errors in dynamic forms
+- FormData type conflict (renamed to FormSubmission)
+
 ## [0.5.0] - 2026-11-20
 
 ### Added

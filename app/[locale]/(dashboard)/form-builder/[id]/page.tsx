@@ -16,7 +16,7 @@ export default async function FormViewPage({ params }: FormViewPageProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-6 bg-white rounded-lg">
       <h1 className="text-2xl font-bold text-primary">{schema.name}</h1>
       <FormDataTable data={formData || []} schema={schema} />
     </div>

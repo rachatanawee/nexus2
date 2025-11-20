@@ -1,9 +1,21 @@
 "use client"
 
 import { FormSubmission } from "../../_lib/types"
-import { DataTable } from "@/components/ui/data-table"
+import { DataTable } from "@/components/tablecn/data-table/data-table"
+import { DataTableToolbar } from "@/components/tablecn/data-table/data-table-toolbar"
+import {
+  ColumnFiltersState,
+  ColumnSizingState,
+  SortingState,
+  VisibilityState,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, Eye, Trash2, Pencil } from "lucide-react"
+import { ArrowUpDown, Eye, Trash2, Pencil, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -24,9 +36,15 @@ export function FormDataTable({ data, schema }: FormDataTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
   const [viewData, setViewData] = useState<FormSubmission | null>(null)
   const [editData, setEditData] = useState<FormSubmission | null>(null)
+  const [duplicateData, setDuplicateData] = useState<FormSubmission | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const { settings } = usePreferences()
   const router = useRouter()
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({})
+  const [rowSelection, setRowSelection] = useState({})
   
   // Get first 3 fields for columns
   const displayFields = schema.schema.fields.slice(0, 3)
@@ -50,23 +68,43 @@ export function FormDataTable({ data, schema }: FormDataTableProps) {
   const columns: ColumnDef<FormSubmission>[] = [
     {
       accessorKey: "id",
-      header: "ID",
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="font-bold">
+          ID
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => row.original.id.slice(0, 8),
+      meta: {
+        variant: "text",
+        label: "ID",
+        placeholder: "Filter by ID...",
+      },
     },
     ...displayFields.map(field => ({
       accessorKey: `data.${field.name}`,
-      header: field.label,
+      header: () => <div className="font-bold">{field.label}</div>,
       cell: ({ row }: { row: { original: FormSubmission } }) => {
         const value = row.original.data[field.name]
         if (value === null || value === undefined) return '-'
         if (typeof value === 'object') return JSON.stringify(value)
         return String(value)
       },
+      filterFn: (row, id, value) => {
+        const fieldValue = row.original.data[field.name]
+        if (!fieldValue) return false
+        return String(fieldValue).toLowerCase().includes(value.toLowerCase())
+      },
+      meta: {
+        variant: "text",
+        label: field.label,
+        placeholder: `Filter ${field.label.toLowerCase()}...`,
+      },
     })),
     {
       accessorKey: "created_at",
       header: ({ column }) => (
-        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")} className="font-bold">
           Submitted
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
@@ -78,49 +116,91 @@ export function FormDataTable({ data, schema }: FormDataTableProps) {
     },
     {
       id: "actions",
-      header: "Actions",
-      cell: ({ row }) => (
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setViewData(row.original)}
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setEditData(row.original)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => handleDelete(row.original.id)}
-            disabled={deletingId === row.original.id}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
+      header: () => <div className="font-bold text-center">Actions</div>,
+      size: 130,
+      enableResizing: false,
+      cell: ({ row }) => {
+        const duplicate = {
+          ...row.original,
+          id: undefined,
+          created_at: undefined,
+          updated_at: undefined,
+        }
+
+        return (
+          <div className="flex gap-0.5 justify-center">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 hover:bg-purple-50" 
+              onClick={() => setViewData(row.original)}
+              title="View Data"
+            >
+              <Eye className="h-3 w-3 text-purple-600" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 hover:bg-blue-50" 
+              onClick={() => setEditData(row.original)}
+              title="Edit Data"
+            >
+              <Pencil className="h-3 w-3 text-blue-600" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 hover:bg-green-50" 
+              onClick={() => setDuplicateData(duplicate as FormSubmission)}
+              title="Duplicate Data"
+            >
+              <Copy className="h-3 w-3 text-green-600" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6 hover:bg-red-50" 
+              onClick={() => handleDelete(row.original.id)}
+              disabled={deletingId === row.original.id}
+              title="Delete Data"
+            >
+              <Trash2 className="h-3 w-3 text-red-600" />
+            </Button>
+          </div>
+        )
+      },
     },
   ]
 
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    onColumnSizingChange: setColumnSizing,
+    columnResizeMode: "onChange",
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      columnSizing,
+      rowSelection,
+    },
+  })
+
   return (
     <>
-      <div className="flex justify-end mb-4">
-        <Button onClick={() => setCreateOpen(true)}>Add Data</Button>
-      </div>
-      <DataTable
-        columns={columns}
-        data={data}
-        searchKey="id"
-        searchPlaceholder="Search submissions..."
-        enableExport={true}
-        exportFilename="form-submissions"
-      />
+      <DataTable table={table}>
+        <DataTableToolbar table={table}>
+          <Button onClick={() => setCreateOpen(true)}>Add Data</Button>
+        </DataTableToolbar>
+      </DataTable>
       
       {viewData && (
         <Dialog open={!!viewData} onOpenChange={() => setViewData(null)}>
@@ -159,6 +239,13 @@ export function FormDataTable({ data, schema }: FormDataTableProps) {
         onOpenChange={(open) => !open && setEditData(null)} 
         schema={schema}
         submission={editData}
+      />
+      
+      <FormDataDialog 
+        open={!!duplicateData} 
+        onOpenChange={(open) => !open && setDuplicateData(null)} 
+        schema={schema}
+        submission={duplicateData}
       />
     </>
   )
