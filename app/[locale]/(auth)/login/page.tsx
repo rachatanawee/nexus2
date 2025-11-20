@@ -18,11 +18,13 @@ export default function LoginPage() {
   async function handleSubmit(formData: FormData) {
     setIsLoading(true)
     setError('')
+    document.body.style.cursor = 'wait'
     const result = await login(formData)
     if (result?.error) {
       setError(result.error)
       toast.error(result.error)
       setIsLoading(false)
+      document.body.style.cursor = 'default'
     }
   }
 

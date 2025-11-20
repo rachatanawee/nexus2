@@ -2,10 +2,14 @@
 
 import { Sidebar } from './sidebar'
 import { PageTransition } from './page-transition'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
+
+  useEffect(() => {
+    document.body.style.cursor = 'default'
+  }, [])
 
   return (
     <div className="flex">
