@@ -637,6 +637,20 @@ See [docs/SYSTEM-TABLES.md](docs/SYSTEM-TABLES.md) for details.
 - [Supabase Docs](https://supabase.com/docs)
 - [Next.js Docs](https://nextjs.org/docs)
 
+## Screenshots
+
+### Dashboard & User Management
+![Dashboard](docs/images/dashboard.png)
+
+### Data Tables with tablecn
+![Products Table](docs/images/products.png)
+
+### Form Builder
+![Form Builder](docs/images/form-builder.png)
+
+### App Settings
+![Settings](docs/images/settings.png)
+
 ## License
 
 MIT
