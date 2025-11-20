@@ -76,7 +76,7 @@ export const columns: ColumnDef<Product>[] = [
         }
       }
 
-      const duplicateData = {
+      const duplicateData: Partial<Product> = {
         ...row.original,
         name: `${row.original.name} (Copy)`,
         id: undefined,

@@ -101,7 +101,7 @@ export function FormSchemaTable({ data }: FormSchemaTableProps) {
           }
         }
 
-        const duplicateData = {
+        const duplicateData: Partial<FormSchema> = {
           ...row.original,
           name: `${row.original.name} (Copy)`,
           id: undefined,

@@ -99,11 +99,9 @@ export const columns: ColumnDef<User>[] = [
         }
       }
 
-      const duplicateData = {
-        ...row.original,
+      const duplicateData: Partial<{ email: string; password: string; roles: ('user' | 'admin' | 'manager')[] }> = {
         email: `${row.original.email.split('@')[0]}_copy@${row.original.email.split('@')[1]}`,
-        id: undefined,
-        created_at: undefined,
+        roles: row.original.roles as ('user' | 'admin' | 'manager')[],
       }
 
       return (

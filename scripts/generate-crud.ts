@@ -351,7 +351,7 @@ ${columnDefs},
         }
       }
 
-      const duplicateData = {
+      const duplicateData: Partial<${Feature}> = {
         ...row.original,
         ${fields[0]?.name || 'name'}: \`\${row.original.${fields[0]?.name || 'name'}} (Copy)\`,
         id: undefined,

@@ -90,13 +90,13 @@ export function FormDataTable({ data, schema }: FormDataTableProps) {
         if (typeof value === 'object') return JSON.stringify(value)
         return String(value)
       },
-      filterFn: (row, id, value) => {
+      filterFn: (row: { original: FormSubmission }, id: string, value: string) => {
         const fieldValue = row.original.data[field.name]
         if (!fieldValue) return false
         return String(fieldValue).toLowerCase().includes(value.toLowerCase())
       },
       meta: {
-        variant: "text",
+        variant: "text" as const,
         label: field.label,
         placeholder: `Filter ${field.label.toLowerCase()}...`,
       },
@@ -120,7 +120,7 @@ export function FormDataTable({ data, schema }: FormDataTableProps) {
       size: 130,
       enableResizing: false,
       cell: ({ row }) => {
-        const duplicate = {
+        const duplicate: Partial<FormSubmission> = {
           ...row.original,
           id: undefined,
           created_at: undefined,
