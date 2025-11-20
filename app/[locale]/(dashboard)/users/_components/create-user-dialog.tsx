@@ -14,9 +14,10 @@ import { createUserSchema, AVAILABLE_ROLES, type CreateUserFormData } from '../_
 interface CreateUserDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  defaultValues?: Partial<CreateUserFormData>
 }
 
-export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) {
+export function CreateUserDialog({ open, onOpenChange, defaultValues }: CreateUserDialogProps) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -30,9 +31,9 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
   } = useForm<CreateUserFormData>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
-      email: '',
+      email: defaultValues?.email || '',
       password: '',
-      roles: ['user']
+      roles: defaultValues?.roles || ['user']
     }
   })
 

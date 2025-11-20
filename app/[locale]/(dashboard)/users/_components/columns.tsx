@@ -3,8 +3,9 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { User } from "../_lib/types"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, Trash2, Users } from "lucide-react"
+import { ArrowUpDown, Trash2, Users, Copy } from "lucide-react"
 import { RoleDialog } from "./role-dialog"
+import { CreateUserDialog } from "./create-user-dialog"
 import { deleteUser } from "../_lib/actions"
 import { toast } from "sonner"
 import { useState } from "react"
@@ -74,11 +75,12 @@ export const columns: ColumnDef<User>[] = [
   {
     id: "actions",
     header: () => <div className="text-center">Actions</div>,
-    size: 120,
+    size: 110,
     enableResizing: false,
     cell: function ActionsCell({ row }) {
       const router = useRouter()
       const [open, setOpen] = useState(false)
+      const [duplicateOpen, setDuplicateOpen] = useState(false)
       const [deleting, setDeleting] = useState(false)
 
       const handleDelete = async () => {
@@ -97,10 +99,20 @@ export const columns: ColumnDef<User>[] = [
         }
       }
 
+      const duplicateData = {
+        ...row.original,
+        email: `${row.original.email.split('@')[0]}_copy@${row.original.email.split('@')[1]}`,
+        id: undefined,
+        created_at: undefined,
+      }
+
       return (
         <div className="flex gap-0.5 justify-center">
           <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-blue-50" onClick={() => setOpen(true)} title="Manage Roles">
             <Users className="h-3 w-3 text-blue-600" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-green-50" onClick={() => setDuplicateOpen(true)} title="Duplicate User">
+            <Copy className="h-3 w-3 text-green-600" />
           </Button>
           <Button
             variant="ghost"
@@ -113,6 +125,7 @@ export const columns: ColumnDef<User>[] = [
             <Trash2 className="h-3 w-3 text-red-600" />
           </Button>
           <RoleDialog open={open} onOpenChange={setOpen} user={row.original} />
+          <CreateUserDialog open={duplicateOpen} onOpenChange={setDuplicateOpen} defaultValues={duplicateData} />
         </div>
       )
     },
