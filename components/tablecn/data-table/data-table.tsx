@@ -62,12 +62,12 @@ export function DataTable<TData>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="!bg-white hover:!bg-gray-50"
+                  className="group !bg-white hover:!bg-gray-50 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="!bg-white border-r"
+                      className="!bg-white group-hover:!bg-gray-50 border-r transition-colors"
                       style={{
                         ...getCommonPinningStyles({ column: cell.column }),
                       }}

@@ -1,7 +1,8 @@
 "use client"
 
 import { FormSchema } from "../_lib/types"
-import { DataTable } from "@/components/ui/data-table"
+import { DataTable } from "@/components/tablecn/data-table/data-table"
+import { DataTableToolbar } from "@/components/tablecn/data-table/data-table-toolbar"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { FormSchemaDialog } from "./form-schema-dialog"
@@ -12,6 +13,16 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { usePreferences } from "@/lib/preferences-context"
 import { formatSystemDate } from "@/lib/format-utils"
+import {
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
 
 interface FormSchemaTableProps {
   data: FormSchema[]
@@ -22,6 +33,10 @@ export function FormSchemaTable({ data }: FormSchemaTableProps) {
   const [createOpen, setCreateOpen] = useState(false)
   const [editSchema, setEditSchema] = useState<FormSchema | null>(null)
   const { settings } = usePreferences()
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState({})
 
   const columns: ColumnDef<FormSchema>[] = [
     {
@@ -101,19 +116,32 @@ export function FormSchemaTable({ data }: FormSchemaTableProps) {
     },
   ]
 
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  })
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={() => setCreateOpen(true)}>Create Form Schema</Button>
-      </div>
-      <DataTable
-        columns={columns}
-        data={data}
-        searchKey="name"
-        searchPlaceholder="Search form schemas..."
-        enableExport={true}
-        exportFilename="form-schemas"
-      />
+      <DataTable table={table}>
+        <DataTableToolbar table={table}>
+          <Button onClick={() => setCreateOpen(true)}>Create Form Schema</Button>
+        </DataTableToolbar>
+      </DataTable>
       <FormSchemaDialog open={createOpen} onOpenChange={setCreateOpen} />
       <FormSchemaDialog 
         open={!!editSchema} 
